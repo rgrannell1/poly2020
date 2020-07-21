@@ -16,7 +16,6 @@ interface SolvePolynomialArgs {
 
 }
 
-
 // -- project onto grid
 interface Grid {
   xBins: number
@@ -30,16 +29,16 @@ interface Tile {
   y: number
 }
 
-type Solution = number[][]
+type Solution = number[]
 
-const asGrid = (solution:Solution, grid:Grid):Tile => {
-  const x = 1
-  const y = 1
+const asTile = (solution:Solution, grid:Grid):Tile => {
+  const xDiff = (grid.xBounds[1] -grid.xBounds[0]) / grid.xBins
+  const x = Math.floor((Math.abs(grid.xBounds[0]) + solution[0]) / xDiff)
+  
+  const yDiff = (grid.yBounds[1] -grid.yBounds[0]) / grid.yBins
+  const y = Math.floor((Math.abs(grid.yBounds[0]) + solution[1]) / yDiff)
 
-  return {
-    x,
-    y
-  }
+  return { x, y }
 }
 
 const repeat = (fn:any, count:number) => {
@@ -59,11 +58,43 @@ const range = function * (lower:number, upper:number) {
 }
 
 const solvePolynomials = function * (config:SolvePolynomialArgs) {
-  const iters = repeat(() => range(-2, +2), 5)
+  const iters = repeat(() => range(-20, +20), 5)
 
   for (let coords of itools.product(...iters)) {
     yield findRoots(coords)    
   }
+}
+
+function * binSolutions (iter:any) {
+  const grid:Grid = {
+    xBins: 1000,
+    yBins: 1000,
+    xBounds: [-10, +10],
+    yBounds: [-10, +10]   
+  }
+
+  for (const [real, imag] of iter) {
+    for (let ith = 0; ith < real.length; ++ith) {
+      const x = real[ith]
+      const y = imag[ith]
+
+      if (Number.isNaN(x) || Number.isNaN(y)) {
+        continue
+      }
+
+      const coord = asTile([x, y], grid)
+
+      if (coord.x < 0 || coord.x > grid.xBins) {
+        continue
+      }
+      if (coord.y < 0 || coord.y > grid.yBins) {
+        continue
+      }
+
+      yield coord
+    }
+  }
+
 }
 
 const poly = async (rawArgs:RawPolyArgs) => {
@@ -77,19 +108,15 @@ const poly = async (rawArgs:RawPolyArgs) => {
     const fcontent = await fs.promises.readFile(fpath)
     configs = JSON.parse(fcontent.toString())
   } catch (err) {
-    console.log(err)
     throw new Error(`failed to load ${configPath} as JSON`)
   }
 
   const config = configs[name]
 
-  let ith = 0
-  for (const solution of solvePolynomials(config)) {
-    ith++
+  const iter = solvePolynomials(config)
 
-    if (ith % 1_000_000 === 0) {
-      console.log(ith)
-    }
+  for (const coord of binSolutions(iter)) {
+    console.log(coord)
   }
 }
 
