@@ -89,18 +89,19 @@ function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):BinGenerator 
 
       // -- discard missing solutions
       if (Number.isNaN(x) || Number.isNaN(y)) {
-        continue
+        // -- yield empty rather than continue to make the progress-bar accurate.
+        yield
+      } else {
+        // -- convert the coordinates into 0...resolution pixel-space
+        const coord = asTile([x, y], grid)
+
+        // -- discard solutions out of bounds.
+        if (coord.x < 0 || coord.x > grid.xBins || coord.y < 0 || coord.y > grid.yBins) {
+          yield
+        } else {
+          yield coord
+        }
       }
-
-      // -- convert the coordinates into 0...resolution pixel-space
-      const coord = asTile([x, y], grid)
-
-      // -- discard solutions out of bounds.
-      if (coord.x < 0 || coord.x > grid.xBins || coord.y < 0 || coord.y > grid.yBins) {
-        continue
-      }
-
-      yield coord
     }
   }
 }
@@ -141,6 +142,12 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
       bar.update(count)
     }
 
+    count++
+
+    if (!coord) {
+      continue
+    }
+
     const [
       red, 
       green,
@@ -151,10 +158,13 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
     image.set(coord.x, coord.y, 0, red)
     image.set(coord.x, coord.y, 1, green)
     image.set(coord.x, coord.y, 2, blue)
-    image.set(coord.x, coord.y, 3, alpha)
-
-    count++
+    image.set(coord.x, coord.y, 3, alpha) 
   }
+
+  bar.update(count)
+  bar.stop()
+
+  console.log('Rendering graph.')
 
   // -- note: this takes 50% of the total runtime at the moment.
   return new Promise((resolve, reject) => {

@@ -5,9 +5,10 @@
  */
 export const totalSolutions = (count:number, order:number) => {
   const coeff = calculate(count, order)
-  const totalEquations = Math.pow((2 * coeff) + 1, order)
+  const rangeLength = (2 * coeff) + 1
+  const totalEquations = Math.pow(rangeLength, order)
 
-  return totalEquations * order
+  return totalEquations * (order - 1)
 }
 
 /**

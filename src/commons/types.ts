@@ -29,5 +29,5 @@ export interface ConfigSection {
 }
 
 export type RootGenerator = Generator<number[][], void, undefined>
-export type BinGenerator = Generator<Tile, void, unknown>
+export type BinGenerator = Generator<Tile | undefined, void, unknown>
 
