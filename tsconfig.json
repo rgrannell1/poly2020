@@ -3,13 +3,15 @@
     "allowJs": true,
     "moduleResolution": "node",
     "module": "ESNext",
+    "outDir": "build",
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "alwaysStrict": true,
     "strictNullChecks": true,
-    "target": "ES2018"
+    "target": "ESNext"
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "build"
   ]
 }

@@ -1,5 +1,18 @@
 {
   "default": {
-
+    "order": 5,
+    "resolution": 10000,
+    "count": 10000000,
+    "xBounds": [-2, 2],
+    "yBounds": [-2, 2],
+    "outputPath": "default.png"
+  },
+  "profile": {
+    "order": 5,
+    "resolution": 10000,
+    "count": 500000,
+    "xBounds": [-2, 2],
+    "yBounds": [-2, 2],
+    "outputPath": "profile.png"
   }
 }

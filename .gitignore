@@ -1,2 +1,8 @@
 *.js
 node_modules/
+perf.*
+perfs.*
+isolate*
+flamegraph.html
+build/
+*.png
