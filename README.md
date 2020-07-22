@@ -1,6 +1,5 @@
 
 # Poly2020
----
 
 ## Stability
 
