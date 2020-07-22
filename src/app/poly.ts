@@ -4,6 +4,7 @@ import * as fs from 'fs'
 import * as pixels from 'save-pixels'
 import * as zeros from 'zeros'
 import * as cliProgress from 'cli-progress'
+import  signale from 'signale'
 
 import itools from 'iter-tools'
 import findRoots from 'durand-kerner'
@@ -22,6 +23,7 @@ import {
   RootGenerator,
   BinGenerator
 } from '../commons/types'
+import { kStringMaxLength } from 'buffer'
 
 /**
  * Convert 
@@ -122,6 +124,7 @@ interface SaveArgandGraphOpts {
  * @returns {Promise<any>} a result promise
  */
 const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<undefined> => {
+  const start = Date.now()
   const image = zeros.default([opts.resolution, opts.resolution, 4])
 
   for (let ith = 0; ith < opts.resolution; ++ith) {
@@ -133,7 +136,12 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
     }  
   }
 
-  const bar = new progress.SingleBar({}, progress.Presets.shades_classic)
+  const bar = new progress.SingleBar({
+    format: '[{bar}] | remaining: {eta}s | ran for: {duration_formatted} | {value} / {total}'
+  }, progress.Presets.shades_classic)
+
+  signale.pending('solving equations...')
+
   bar.start(bounds.totalSolutions(opts.count, opts.order))
 
   let count = 0
@@ -164,7 +172,10 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
   bar.update(count)
   bar.stop()
 
-  console.log('Rendering graph.')
+  const secondsElapsed = (Date.now() - start) / 1000
+  const perSecond = Math.round(count / secondsElapsed).toLocaleString()
+
+  signale.success(`${perSecond} / s`)
 
   // -- note: this takes 50% of the total runtime at the moment.
   return new Promise((resolve, reject) => {

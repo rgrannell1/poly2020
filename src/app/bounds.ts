@@ -18,9 +18,18 @@ export const totalSolutions = (count:number, order:number) => {
  * the provided solution count, but may be greater.
  * 
  * @param solutionCount the desired number of solutions
- * @param order the order of the polynomial. Note these polynomials are monic, so 
- *   one their terms are ignored and order 3 will be in fact 4. 
+ * @param order the order of the polynomial. 
+ *   
  */
 export const calculate = (solutionCount:number, order:number) => {
-  return Math.ceil(Math.pow(solutionCount, 1 / order) / 2)
+  // -- inefficient but avoids another equation.
+  for (let count = 1; true; count += 1) {
+    let rangeLength = count
+    let totalEquations = Math.pow(rangeLength, order)
+    let candidateCount = totalEquations * (order - 1)
+
+    if (candidateCount > solutionCount) {
+      return Math.ceil(count / 2) 
+    }
+  }
 }
