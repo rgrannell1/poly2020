@@ -1,10 +1,18 @@
 {
+  "example": {
+    "order": 5,
+    "resolution": 1000,
+    "count": 100000,
+    "xBounds": [-3, 3],
+    "yBounds": [-3, 3],
+    "outputPath": "example.png"
+  },
   "default": {
     "order": 5,
     "resolution": 10000,
-    "count": 1000000,
-    "xBounds": [-2, 2],
-    "yBounds": [-2, 2],
+    "count": 100000000,
+    "xBounds": [-1, 1],
+    "yBounds": [-1, 1],
     "outputPath": "default.png"
   },
   "profile": {

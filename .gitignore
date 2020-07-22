@@ -6,3 +6,4 @@ isolate*
 flamegraph.html
 build/
 *.png
+!example.png

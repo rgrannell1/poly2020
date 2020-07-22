@@ -140,9 +140,15 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
     format: '[{bar}] | remaining: {eta}s | ran for: {duration_formatted} | {value} / {total}'
   }, progress.Presets.shades_classic)
 
+  console.log([
+    '🌴 🌴 🌴 🦜 Poly2020 🦜 🌴 🌴 🌴',
+    '',
+    ''
+  ].join('\n'))
   signale.pending('solving equations...')
 
-  bar.start(bounds.totalSolutions(opts.count, opts.order))
+  const totalSolutions = bounds.totalSolutions(opts.count, opts.order)
+  bar.start(totalSolutions)
 
   let count = 0
   for (const coord of coords) {
@@ -161,7 +167,7 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
       green,
       blue,
       alpha
-    ] = colours.hue(coord)
+    ] = colours.hue(count, totalSolutions)
 
     image.set(coord.x, coord.y, 0, red)
     image.set(coord.x, coord.y, 1, green)
@@ -176,14 +182,21 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
   const perSecond = Math.round(count / secondsElapsed).toLocaleString()
 
   signale.success(`${perSecond} / s`)
+  signale.pending(`writing to "${opts.fpath}"...`)
 
   // -- note: this takes 50% of the total runtime at the moment.
   return new Promise((resolve, reject) => {
+    const writeStart = Date.now()
     const writeStream = fs.createWriteStream(opts.fpath)
     pixels.default(image, 'png')
       .pipe(writeStream)
 
-    writeStream.on('finish', resolve)
+    writeStream.on('finish', () => {
+      const secondsElapsed = Math.floor((Date.now() - writeStart) / 1000)
+      signale.success(`ran for: ${secondsElapsed}s`)
+
+      resolve()
+    })
     writeStream.on('error', reject)
   })
 }
