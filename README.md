@@ -43,10 +43,10 @@ npm install
 
 | Solutions     | Time (2016)   | Time (2020)   |
 | ------------- |:-------------:| :------------:|
-| ten thousand  | 1 second      | 0.05 seconds  |
-| ten million   | 16 minutes    | 50 seconds    |
-| one billion   | 1.15 days     | 1.4 hours     |
-| one trillion  | new laptop 🙁 | 60 days       |
+| ten thousand  | 1 second      | 0.01 seconds  |
+| ten million   | 16 minutes    | 17 seconds    |
+| one billion   | 1.15 days     | 30 minutes    |
+| one trillion  | new laptop 🙁 | 20 days       |
 
 ## Changelog
 
