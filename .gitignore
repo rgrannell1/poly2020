@@ -7,3 +7,4 @@ flamegraph.html
 build/
 *.png
 !example.png
+.nyc_output

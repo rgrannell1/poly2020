@@ -1,3 +1,4 @@
+import { Socket } from "dgram"
 
 /**
  * Calculate the number of solutions generated, given an upper bound coefficient
@@ -22,6 +23,10 @@ export const totalSolutions = (count:number, order:number) => {
  *   
  */
 export const calculate = (solutionCount:number, order:number) => {
+  if (!order) {
+    throw new Error('order was invalid.')
+  }
+
   // -- inefficient but avoids another equation.
   for (let count = 1; true; count += 1) {
     let rangeLength = count

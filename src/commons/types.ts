@@ -19,13 +19,28 @@ export interface Grid {
  */
 export type Solution = [number, number]
 
+interface PolynomialConfig {
+  order: number
+  count: number
+}
+
+interface BoundsConfig {
+  x: [number, number],
+  y: [number, number]
+}
+
+interface ImageConfig {
+  resolution: number
+  outputPath: string
+  bounds: BoundsConfig
+}
+
 /**
  * Configuration section
  */
 export interface ConfigSection {
-  order: number
-  count: number
-  resolution: number
+  polynomial: PolynomialConfig
+  image: ImageConfig
 }
 
 export type RootGenerator = Generator<number[][], void, undefined>

@@ -1,14 +1,9 @@
 {
   "templates": {
     "default": {
-      "polynomial": {
-        "order": 5
-      },
-      "image": {
-        "bounds": {
-          "x": [-3, 3],
-          "y": [-3, 3]
-        }
+      "bounds": {
+        "x": [-3, 3],
+        "y": [-3, 3]
       }
     }
   },
@@ -17,22 +12,22 @@
     "default": {
       "template": "default",
       "polynomial": {
-        "count": 8000000000
+        "count": 10000
       },
       "image": {
         "outputPath": "example.png",
-        "resolution": 6000
+        "resolution": 1000
       }
     },
 
     "example": {
       "template": "default",
       "polynomial": {
-        "count": 1000
+        "count": 10000
       },
       "image": {
         "outputPath": "example.png",
-        "resolution": 10000,
+        "resolution": 1000,
         "bounds": {
           "x": [-3, 3],
           "y": [-3, 3]

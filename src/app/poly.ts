@@ -12,6 +12,7 @@ import findRoots from 'durand-kerner'
 import * as utils from '../commons/utils.js'
 import * as colours from '../app/colours.js'
 import * as bounds from '../app/bounds.js'
+import deepmerge from 'deepmerge'
 
 const progress = cliProgress.default
 
@@ -52,10 +53,10 @@ const asTile = (solution:Solution, grid:Grid):Tile => {
  * @param config 
  */
 const solvePolynomials = function * (config:ConfigSection):RootGenerator {
-  const coeff = bounds.calculate(config.count, config.order)
+  const coeff = bounds.calculate(config.polynomial.count, config.polynomial.order)
   const coeffRanges = utils.repeat(() => {
     return utils.range(-coeff, +coeff)
-  }, config.order)
+  }, config.polynomial.order)
 
   // -- todo use .count
   for (let coords of itools.product(...coeffRanges)) {
@@ -75,7 +76,7 @@ interface BinSolutionOpts {
  * @param iter 
  * @param resolution 
  */
-function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):BinGenerator {
+function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):BinGenerator {  
   const grid:Grid = {
     xBins: opts.resolution,
     yBins: opts.resolution,
@@ -137,7 +138,7 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
   }
 
   const bar = new progress.SingleBar({
-    format: '[{bar}] | remaining: {eta}s | ran for: {duration_formatted} | {value} / {total}'
+    format: '[{bar}] | remaining: {eta_formatted} | ran for: {duration_formatted} | {value} / {total}'
   }, progress.Presets.shades_classic)
 
   console.log([
@@ -191,9 +192,12 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
     pixels.default(image, 'png')
       .pipe(writeStream)
 
-    writeStream.on('finish', () => {
+    writeStream.on('finish', async () => {
+      const stat = await fs.promises.stat(opts.fpath)
+      const size = (stat.size / 1e6).toFixed(1)
+
       const secondsElapsed = Math.floor((Date.now() - writeStart) / 1000)
-      signale.success(`ran for: ${secondsElapsed}s`)
+      signale.success(`ran for: ${secondsElapsed}s (${opts.resolution} x ${opts.resolution}, ${size}MB)`)
 
       resolve()
     })
@@ -202,19 +206,11 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
 }
 
 interface RawPolyArgs {
-  "<fpath>": string,
-  "<name>": string
+  "--config": string,
+  "--name": string
 }
 
-/**
- * The core application
- * 
- * @param rawArgs arguments provided by the CLI interface 
- */
-const poly = async (rawArgs:RawPolyArgs) => {
-  const configPath = rawArgs['<fpath>']
-  const name = rawArgs['<name>']
-
+const loadConfig = async (configPath:string, name:string) => {
   let configs
   
   try {
@@ -225,19 +221,38 @@ const poly = async (rawArgs:RawPolyArgs) => {
     throw new Error(`failed to load ${configPath} as JSON`)
   }
 
-  const config = configs[name]
+  const config = configs.jobs[name]
+
+  if (config.template) {
+    const parent = configs.templates[config.template]
+    return deepmerge(parent, config)
+  } else {
+    return config
+  }
+}
+
+/**
+ * The core application
+ * 
+ * @param rawArgs arguments provided by the CLI interface 
+ */
+const poly = async (rawArgs:RawPolyArgs) => {
+  const configPath = rawArgs['--config']
+  const name = rawArgs['--name']
+
+  const config = await loadConfig(configPath, name)
 
   const binIter = binSolutions(solvePolynomials(config), {
-    resolution: config.resolution,
-    xBounds: config.xBounds,
-    yBounds: config.yBounds
+    resolution: config.image.resolution,
+    xBounds: config.image.bounds.x,
+    yBounds: config.image.bounds.y
   })
 
   await saveArgandGraph(binIter, {
-    resolution: config.resolution,
-    fpath: config.outputPath,
-    count: config.count,
-    order: config.order
+    resolution: config.image.resolution,
+    fpath: config.image.outputPath,
+    count: config.polynomial.count,
+    order: config.polynomial.order
   })
 }
 
