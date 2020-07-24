@@ -17,11 +17,11 @@
     "default": {
       "template": "default",
       "polynomial": {
-        "count": 8000000000
+        "count": 8000000
       },
       "image": {
         "outputPath": "example.png",
-        "resolution": 6000
+        "resolution": 3000
       }
     },
 
@@ -43,7 +43,7 @@
     "profile": {
       "template": "default",
       "polynomial": {
-        "count": 10000
+        "count": 10000000
       },
       "image": {
         "outputPath": "example.png",

@@ -19,3 +19,8 @@ declare module "cli-progress" {
   var findRoots: any;
   export = findRoots;
 }
+
+declare module "lzma-native" {
+  var output: any;
+  export = output;
+}

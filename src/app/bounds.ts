@@ -1,4 +1,6 @@
-import { Socket } from "dgram"
+
+import * as utils from '../commons/utils.js'
+import itools from 'iter-tools'
 
 /**
  * Calculate the number of solutions generated, given an upper bound coefficient
@@ -36,5 +38,28 @@ export const calculate = (solutionCount:number, order:number) => {
     if (candidateCount > solutionCount) {
       return Math.ceil(count / 2) 
     }
+  }
+}
+
+/**
+ * 
+ * @param spaces 
+ */
+export const space = (count:number, order:number) => {
+  const coeff = calculate(count, order)
+  const coeffRanges = utils.repeat(() => {
+    return utils.range(-coeff, +coeff)
+  }, order)
+
+  return itools.product(...coeffRanges)
+}
+
+/**
+ * 
+ * @param spaces 
+ */
+export const differences = function * (space:any, spaces:any) {
+  for (const coord of space) {
+    yield coord
   }
 }

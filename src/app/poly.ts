@@ -6,12 +6,13 @@ import * as zeros from 'zeros'
 import * as cliProgress from 'cli-progress'
 import  signale from 'signale'
 
-import itools from 'iter-tools'
 import findRoots from 'durand-kerner'
 
 import * as utils from '../commons/utils.js'
 import * as colours from '../app/colours.js'
 import * as bounds from '../app/bounds.js'
+import * as storage from '../app/storage.js'
+import * as diff from '../app/diff.js'
 import deepmerge from 'deepmerge'
 
 const progress = cliProgress.default
@@ -24,7 +25,6 @@ import {
   RootGenerator,
   BinGenerator
 } from '../commons/types'
-import { kStringMaxLength } from 'buffer'
 
 /**
  * Convert 
@@ -52,14 +52,8 @@ const asTile = (solution:Solution, grid:Grid):Tile => {
  * 
  * @param config 
  */
-const solvePolynomials = function * (config:ConfigSection):RootGenerator {
-  const coeff = bounds.calculate(config.polynomial.count, config.polynomial.order)
-  const coeffRanges = utils.repeat(() => {
-    return utils.range(-coeff, +coeff)
-  }, config.polynomial.order)
-
-  // -- todo use .count
-  for (let coords of itools.product(...coeffRanges)) {
+const solvePolynomials = function * (iter:any):RootGenerator {
+  for (let coords of iter) {
     yield findRoots(coords)    
   }
 }
@@ -93,7 +87,7 @@ function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):BinGenerator 
       // -- discard missing solutions
       if (Number.isNaN(x) || Number.isNaN(y)) {
         // -- yield empty rather than continue to make the progress-bar accurate.
-        yield
+        yield 
       } else {
         // -- convert the coordinates into 0...resolution pixel-space
         const coord = asTile([x, y], grid)
@@ -231,6 +225,14 @@ const loadConfig = async (configPath:string, name:string) => {
   }
 }
 
+const getFilePaths = () => {
+  const date = Date.now()
+  return {
+    storagePath: `data/${date}.bin`,
+    metadataPath: `data/${date}.metadata.json`
+  }
+}
+
 /**
  * The core application
  * 
@@ -241,13 +243,41 @@ const poly = async (rawArgs:RawPolyArgs) => {
   const name = rawArgs['--name']
 
   const config = await loadConfig(configPath, name)
+  const targetRanges = await diff.ranges(config, 'data')
 
-  const binIter = binSolutions(solvePolynomials(config), {
+  const {
+    count,
+    order
+  } = config.polynomial
+
+  const spaceIter = bounds.space(count, order)
+  const requiredIter = bounds.differences(spaceIter, targetRanges)
+
+  const solveIter = solvePolynomials(requiredIter)
+
+  const binIter = binSolutions(solveIter, {
     resolution: config.image.resolution,
     xBounds: config.image.bounds.x,
     yBounds: config.image.bounds.y
   })
 
+  const filterIter = storage.uniqueAsBinary(binIter, {
+    resolution: config.image.resolution
+  })
+
+  const {
+    storagePath,
+    metadataPath
+  } = getFilePaths()
+  
+  await storage.write(filterIter, {
+    storagePath,
+    metadataPath,
+    ranges: targetRanges
+  })
+
+  return
+  
   await saveArgandGraph(binIter, {
     resolution: config.image.resolution,
     fpath: config.image.outputPath,

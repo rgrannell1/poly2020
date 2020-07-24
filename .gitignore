@@ -4,7 +4,8 @@ perf.*
 perfs.*
 isolate*
 flamegraph.html
-build/
+out/
 *.png
 !example.png
 .nyc_output
+data/
