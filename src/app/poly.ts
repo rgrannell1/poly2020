@@ -201,7 +201,8 @@ const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<
 
 interface RawPolyArgs {
   "--config": string,
-  "--name": string
+  "--name": string,
+  show: Boolean
 }
 
 const loadConfig = async (configPath:string, name:string) => {
@@ -225,11 +226,11 @@ const loadConfig = async (configPath:string, name:string) => {
   }
 }
 
-const getFilePaths = () => {
+const getFilePaths = (coeff:number, order:number) => {
   const date = Date.now()
   return {
-    storagePath: `data/${date}.bin`,
-    metadataPath: `data/${date}.metadata.json`
+    storagePath: `data/${order}-${coeff}.bin`,
+    metadataPath: `data/${order}-${coeff}.metadata.json`
   }
 }
 
@@ -243,40 +244,54 @@ const poly = async (rawArgs:RawPolyArgs) => {
   const name = rawArgs['--name']
 
   const config = await loadConfig(configPath, name)
-  const targetRanges = await diff.ranges(config, 'data')
-
   const {
     count,
     order
   } = config.polynomial
 
-  const spaceIter = bounds.space(count, order)
-  const requiredIter = bounds.differences(spaceIter, targetRanges)
+  if (rawArgs.show) {
+    // -- todo 
+  }
 
-  const solveIter = solvePolynomials(requiredIter)
+  const targetCoeff = bounds.calculate(count, order)
+  const minCoeff = await diff.solved(config, 'data')
 
-  const binIter = binSolutions(solveIter, {
-    resolution: config.image.resolution,
-    xBounds: config.image.bounds.x,
-    yBounds: config.image.bounds.y
-  })
+  for (let coeff = minCoeff; coeff <= targetCoeff; ++coeff) {
+    console.log(`${coeff} tmp log`)
 
-  const filterIter = storage.uniqueAsBinary(binIter, {
-    resolution: config.image.resolution
-  })
-
-  const {
-    storagePath,
-    metadataPath
-  } = getFilePaths()
+    const spaceIter = bounds.edgeSpace(coeff, order)  
+    const solveIter = solvePolynomials(spaceIter)
   
-  await storage.write(filterIter, {
-    storagePath,
-    metadataPath,
-    ranges: targetRanges
-  })
+    const binIter = binSolutions(solveIter, {
+      resolution: config.image.resolution,
+      xBounds: config.image.bounds.x,
+      yBounds: config.image.bounds.y
+    })
+  
+    const filterIter = storage.uniqueAsBinary(binIter, {
+      resolution: config.image.resolution
+    })
+  
+    const {
+      storagePath,
+      metadataPath
+    } = getFilePaths(coeff, order)
+
+    await storage.write(filterIter, {
+      storagePath,
+      metadataPath,
+      coeff,
+      order
+    })
+  }
+
 
   return
+  /**
+   
+
+
+  
   
   await saveArgandGraph(binIter, {
     resolution: config.image.resolution,
@@ -284,6 +299,8 @@ const poly = async (rawArgs:RawPolyArgs) => {
     count: config.polynomial.count,
     order: config.polynomial.order
   })
+
+   */
 }
 
 export default poly

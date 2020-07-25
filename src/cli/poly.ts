@@ -5,6 +5,7 @@ import poly from '../app/poly.js'
 const doc = `
 Usage:
   poly --config <fpath> --name <name>
+  poly show
 
 Description:
   Polynomial is a CLI tool that plots the solution to large numbers of polynomials, to create

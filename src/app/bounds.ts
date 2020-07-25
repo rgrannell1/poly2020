@@ -45,13 +45,34 @@ export const calculate = (solutionCount:number, order:number) => {
  * 
  * @param spaces 
  */
-export const space = (count:number, order:number) => {
-  const coeff = calculate(count, order)
+export const space = (coeff:number, order:number) => {
   const coeffRanges = utils.repeat(() => {
     return utils.range(-coeff, +coeff)
   }, order)
 
   return itools.product(...coeffRanges)
+}
+
+export const edgeSpace = function * (coeff:number, order:number) {
+  const coeffRanges = utils.repeat(() => {
+    return utils.range(-coeff, +coeff)
+  }, order)
+
+  const product:any = itools.product(...coeffRanges)
+
+  for (const coord of product) {
+    let isEdge = false
+    for (const subCoeff of coord) {
+      if (subCoeff === -coeff || subCoeff === coeff) {
+        isEdge = true
+        break
+      }
+    }
+
+    if (isEdge) {
+      yield coord
+    }
+  }
 }
 
 /**

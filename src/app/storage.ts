@@ -71,10 +71,14 @@ const yieldCoordChunks = function * (iter:any, opts:Object) {
   }
 }
 
-export const writeBinary = (iter:any, opts:Object):stream.Readable => {
+export const writeBinary = (iter:any, opts:Object) => {
+  const readerData:any = {
+    count: 0
+  } 
+
   const chunkIter = yieldCoordChunks(iter, opts)
 
-  return new stream.Readable({
+  const reader = new stream.Readable({
     encoding: undefined,
     read() {
       let result
@@ -83,28 +87,46 @@ export const writeBinary = (iter:any, opts:Object):stream.Readable => {
         if (!elem) {
           continue
         }
+        readerData.count++
         this.push(elem)
       }
 
       this.push(null)
     }
   })
+
+  readerData.reader = reader
+
+  return readerData
 }
 
 interface WriteOpts {
   storagePath: string,
   metadataPath: string,
-  ranges: number[][]
+  coeff: number,
+  order: number
 }
 
-export const write = (filterIter:any, opts:WriteOpts) => {
-  const reader = writeBinary(filterIter, { })
+interface WriteMetadataOpts {
+  
+}
+
+export const writeMetadata = (fpath:string, data:Object) => {
+  const stringify = JSON.stringify(data, null, 2)
+
+  return fs.promises.writeFile(fpath, stringify)
+}
+
+export const write = async (filterIter:any, opts:WriteOpts) => {
+  const readerData = writeBinary(filterIter, { })
+
   const writer = fs.createWriteStream(opts.storagePath, {
     encoding: 'binary'
   })
 
-  return new Promise((resolve, reject) => {
-    const fstream = reader
+  // -- wait for all data to be written before writing metadata.
+  const writtenCount = await new Promise((resolve, reject) => {
+    const fstream = readerData.reader
       .on('error', reject)
       .pipe(lzma.createCompressor())
       .on('error', reject)
@@ -112,7 +134,14 @@ export const write = (filterIter:any, opts:WriteOpts) => {
       .on('error', reject)
 
     fstream.on('finish', () => {
-      resolve()
+      resolve(readerData.count)
     })
+  })
+
+  // -- write metadata after so we can assume the data files are complete
+  await writeMetadata(opts.metadataPath, {
+    coeff: opts.coeff,
+    order: opts.order,
+    count: writtenCount
   })
 }
