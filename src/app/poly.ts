@@ -1,12 +1,11 @@
 
+import draw from './commands/draw.js'
 import solve from '../app/commands/solve.js'
-import show from '../app/commands/show.js'
+import showMetadata from './commands/metadata.js'
 
-interface RawPolyArgs {
-  "--config": string,
-  "--name": string,
-  show: Boolean
-}
+import {
+  RawPolyArgs
+} from '../commons/types'
 
 /**
  * The core application
@@ -15,9 +14,10 @@ interface RawPolyArgs {
  */
 const poly = async (rawArgs:RawPolyArgs) => {
   if (rawArgs.show) {
-    await show()
+    await showMetadata()
   } else {
-    await solve(rawArgs)
+    //await solve(rawArgs)
+    await draw(rawArgs)
   }
 }
 

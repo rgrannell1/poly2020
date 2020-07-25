@@ -221,3 +221,28 @@ export const readMetadata = async (folder:string) => {
 
   return results
 }
+
+/**
+ * Read solutions an yield them asyncronously
+ * 
+ * @param order the order of the polynomial
+ * @param folder the folder to load data from
+ * 
+ * Asyncronously yields arrays of tiles
+ */
+export const readSolutions = async function * (order:number, folder:string) {
+  const listing = await fs.promises.readdir(folder)
+  const targets = listing.filter(item => {
+    return item.endsWith('.bin')
+  })
+
+  for (const target of targets) {
+    const readStream = fs.createReadStream(path.join(folder, target), { 
+      highWaterMark: COORD_REPEATS * 8
+    })
+
+    for await (const buffer of readStream) {
+      buffer.toString()
+    }
+  }
+}

@@ -44,6 +44,12 @@ export interface ConfigSection {
   image: ImageConfig
 }
 
+export interface RawPolyArgs {
+  "--config": string,
+  "--name": string,
+  show: Boolean
+}
+
 export type RootGenerator = Generator<number[][], void, undefined>
 export type BinGenerator = Generator<Tile | undefined, void, unknown>
 

@@ -11,6 +11,7 @@ import findRoots from 'durand-kerner'
 import * as colours from '../../app/colours.js'
 import * as bounds from '../../app/bounds.js'
 import * as storage from '../../app/storage.js'
+import * as configModule from '../../app/config.js'
 import * as diff from '../../app/diff.js'
 import deepmerge from 'deepmerge'
 
@@ -204,27 +205,6 @@ interface RawPolyArgs {
   show: Boolean
 }
 
-const loadConfig = async (configPath:string, name:string) => {
-  let configs
-  
-  try {
-    const fpath = path.join(process.cwd(), 'config.json')
-    const fcontent = await fs.promises.readFile(fpath)
-    configs = JSON.parse(fcontent.toString())
-  } catch (err) {
-    throw new Error(`failed to load ${configPath} as JSON`)
-  }
-
-  const config = configs.jobs[name]
-
-  if (config.template) {
-    const parent = configs.templates[config.template]
-    return deepmerge(parent, config)
-  } else {
-    return config
-  }
-}
-
 const getFilePaths = (coeff:number, order:number) => {
   const date = Date.now()
   return {
@@ -233,12 +213,11 @@ const getFilePaths = (coeff:number, order:number) => {
   }
 }
 
-
 const solve = async (rawArgs:RawPolyArgs) => {
   const configPath = rawArgs['--config']
   const name = rawArgs['--name']
 
-  const config = await loadConfig(configPath, name)
+  const config = await configModule.load(configPath, name)
   const {
     count,
     order
@@ -247,9 +226,8 @@ const solve = async (rawArgs:RawPolyArgs) => {
   const targetCoeff = bounds.calculate(count, order)
   const minCoeff = await diff.solved(order, 'data')
 
+  // -- write the solutions
   for (let coeff = minCoeff; coeff <= targetCoeff; ++coeff) {
-    console.log(`${coeff} tmp log`)
-
     const spaceIter = bounds.edgeSpace(coeff, order)  
     const solveIter = solvePolynomials(spaceIter)
   
@@ -275,22 +253,6 @@ const solve = async (rawArgs:RawPolyArgs) => {
       order
     })
   }
-
-  return
-  /**
-   
-
-
-  
-  
-  await saveArgandGraph(binIter, {
-    resolution: config.image.resolution,
-    fpath: config.image.outputPath,
-    count: config.polynomial.count,
-    order: config.polynomial.order
-  })
-
-   */  
 }
 
 export default solve
