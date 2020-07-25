@@ -1,9 +1,10 @@
 
+export type Colour = [number, number, number, number]
+
 export interface Tile {
   x: number,
   y: number
 }
-
 
 // -- project onto grid
 export interface Grid {

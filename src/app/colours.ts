@@ -1,6 +1,6 @@
 
 import {
-  Tile
+	Colour
 } from '../commons/types'
 
 /**
@@ -8,7 +8,7 @@ import {
  * 
  * @param tile 
  */
-export const hue = (count: number, total: number):number[] => {
+export const hue = (count: number, total: number):Colour => {
 	let index = Math.floor((count / total) * Math.pow(255, 3))
 	let blue  = (index) & 255
 	let green = (index >> 8) & 255

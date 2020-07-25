@@ -109,10 +109,10 @@ interface WriteOpts {
 }
 
 interface WriteMetadataOpts {
-  
+  [key:string]: any
 }
 
-export const writeMetadata = (fpath:string, data:Object) => {
+export const writeMetadata = (fpath:string, data:WriteMetadataOpts) => {
   const stringify = JSON.stringify(data, null, 2)
 
   return fs.promises.writeFile(fpath, stringify)
@@ -120,7 +120,6 @@ export const writeMetadata = (fpath:string, data:Object) => {
 
 export const write = async (filterIter:any, opts:WriteOpts) => {
   const readerData = writeBinary(filterIter, { })
-
   const writer = fs.createWriteStream(opts.storagePath, {
     encoding: 'binary'
   })

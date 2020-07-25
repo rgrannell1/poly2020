@@ -5,6 +5,11 @@ import itools from 'iter-tools'
 /**
  * Calculate the number of solutions generated, given an upper bound coefficient
  * and the polynomial order.
+ * 
+ * @param count the target count
+ * @param order the order of the equation
+ * 
+ * @returns the total number of solutions required
  */
 export const totalSolutions = (count:number, order:number) => {
   const coeff = calculate(count, order)
@@ -41,18 +46,7 @@ export const calculate = (solutionCount:number, order:number) => {
   }
 }
 
-/**
- * 
- * @param spaces 
- */
-export const space = (coeff:number, order:number) => {
-  const coeffRanges = utils.repeat(() => {
-    return utils.range(-coeff, +coeff)
-  }, order)
-
-  return itools.product(...coeffRanges)
-}
-
+// -- todo performance is trash
 export const edgeSpace = function * (coeff:number, order:number) {
   const coeffRanges = utils.repeat(() => {
     return utils.range(-coeff, +coeff)
@@ -72,15 +66,5 @@ export const edgeSpace = function * (coeff:number, order:number) {
     if (isEdge) {
       yield coord
     }
-  }
-}
-
-/**
- * 
- * @param spaces 
- */
-export const differences = function * (space:any, spaces:any) {
-  for (const coord of space) {
-    yield coord
   }
 }
