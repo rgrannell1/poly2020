@@ -2,6 +2,7 @@
 import stream from 'stream'
 import  lzma from 'lzma-native'
 import * as fs from 'fs'
+import * as path from 'path'
 
 import {
   BinGenerator
@@ -144,4 +145,26 @@ export const write = async (filterIter:any, opts:WriteOpts) => {
     order: opts.order,
     count: writtenCount
   })
+}
+
+export const readMetadata = async (folder:string) => {
+  const listing = await fs.promises.readdir(folder)
+  const targets = listing.filter(item => {
+    return item.endsWith('metadata.json')
+  })
+
+  const results = []
+
+  for (const target of targets) {
+    const content = await fs.promises.readFile(path.join(folder, target))
+
+    try {
+      const data = JSON.parse(content.toString())
+      results.push(data)
+    } catch (err) {
+      throw new Error(`failed to parse "${target}"`)
+    }
+  }
+
+  return results
 }

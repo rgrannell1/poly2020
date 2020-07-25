@@ -234,12 +234,27 @@ const getFilePaths = (coeff:number, order:number) => {
   }
 }
 
+const show = async () => {
+  const results = await storage.readMetadata('data')
+
+  const totalCount = results.reduce((acc, curr) => {
+    return acc + curr.count
+  }, 0)
+
+  console.log(totalCount)
+}
+
 /**
  * The core application
  * 
  * @param rawArgs arguments provided by the CLI interface 
  */
 const poly = async (rawArgs:RawPolyArgs) => {
+  if (rawArgs.show) {
+    await show()
+    process.exit(0)
+  }
+
   const configPath = rawArgs['--config']
   const name = rawArgs['--name']
 
@@ -248,10 +263,6 @@ const poly = async (rawArgs:RawPolyArgs) => {
     count,
     order
   } = config.polynomial
-
-  if (rawArgs.show) {
-    // -- todo 
-  }
 
   const targetCoeff = bounds.calculate(count, order)
   const minCoeff = await diff.solved(config, 'data')
