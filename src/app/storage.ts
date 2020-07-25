@@ -8,6 +8,11 @@ import {
   BinGenerator
 } from '../commons/types'
 
+/**
+ * Convert any tiles in range to a binary string. Since this operation will be repeated billions 
+ * of times and the space is approximately 64k elements the result is memoised in a pair of maps. This
+ * speeds up encoding.
+ */
 {
   var encoder = new Map()
   var decoder = new Map()
@@ -19,10 +24,20 @@ import {
   }
 }
 
+/**
+ * Encode a coordinate as a binary two-byte string
+ * 
+ * @param coord a single dimension between 0 and 2^16 - 1
+ */
 const encode = (coord:number):string => {
   return encoder.get(coord)
 }
 
+/**
+ * Decode a coordinate from a binary two-byte string
+ * 
+ * @param coord a binary string
+ */
 const decode = (coord:string):number => {
   return decoder.get(coord)
 }
@@ -52,15 +67,25 @@ export const uniqueAsBinary = function * (iter:BinGenerator, opts:SelectUniqueOp
   }
 }
 
+// -- tune this.
 const COORD_REPEATS = 128 * 2
 
-const yieldCoordChunks = function * (iter:any, opts:Object) {
+type EncodedIter = Generator<[number, number], void, unknown>
+type EncodedBufferIter = Generator<Buffer | undefined, void, unknown>
+
+/**
+ * Receive a generator of binary-encoded pairs, and yield binary-buffers
+ * containing data to store. 
+ * 
+ * @param iter the iterator yielding 
+ * @param opts 
+ */
+const yieldBinaryBuffers = function * (iter:EncodedIter, opts:Object):EncodedBufferIter {
   let parts = []
   
   for (const coord of iter) {
     if (coord) {
-      parts.push(coord[0])
-      parts.push(coord[1])
+      parts.push(coord[0], coord[1])
 
       if (parts.length > COORD_REPEATS) {
         yield Buffer.from(parts.join(''), 'binary')
@@ -77,7 +102,7 @@ export const writeBinary = (iter:any, opts:Object) => {
     count: 0
   } 
 
-  const chunkIter = yieldCoordChunks(iter, opts)
+  const chunkIter = yieldBinaryBuffers(iter, opts)
 
   const reader = new stream.Readable({
     encoding: undefined,
@@ -112,12 +137,26 @@ interface WriteMetadataOpts {
   [key:string]: any
 }
 
+/**
+ * Write metadata to a file
+ * 
+ * @param fpath the path to output the metadata to
+ * @param data the data to store
+ * 
+ * @returns a promise
+ */
 export const writeMetadata = (fpath:string, data:WriteMetadataOpts) => {
   const stringify = JSON.stringify(data, null, 2)
 
   return fs.promises.writeFile(fpath, stringify)
 }
 
+/**
+ * Write solutions (encoded as LZMA-compressed binary data) and associated metadata to a pair of files.
+ * 
+ * @param filterIter 
+ * @param opts 
+ */
 export const write = async (filterIter:any, opts:WriteOpts) => {
   const readerData = writeBinary(filterIter, { })
   const writer = fs.createWriteStream(opts.storagePath, {
@@ -146,6 +185,11 @@ export const write = async (filterIter:any, opts:WriteOpts) => {
   })
 }
 
+/**
+ * Read all metadata files from a folder.
+ * 
+ * @param folder 
+ */
 export const readMetadata = async (folder:string) => {
   const listing = await fs.promises.readdir(folder)
   const targets = listing.filter(item => {
