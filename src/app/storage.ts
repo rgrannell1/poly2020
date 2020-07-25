@@ -7,6 +7,7 @@ import * as path from 'path'
 import {
   BinGenerator
 } from '../commons/types'
+import { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } from 'constants'
 
 /**
  * Convert any tiles in range to a binary string. Since this operation will be repeated billions 
@@ -97,8 +98,13 @@ const yieldBinaryBuffers = function * (iter:EncodedIter, opts:Object):EncodedBuf
   }
 }
 
+interface ReaderData {
+  count: number,
+  reader?: stream.Readable
+}
+
 export const writeBinary = (iter:any, opts:Object) => {
-  const readerData:any = {
+  const readerData:ReaderData = {
     count: 0
   } 
 
@@ -165,6 +171,10 @@ export const write = async (filterIter:any, opts:WriteOpts) => {
 
   // -- wait for all data to be written before writing metadata.
   const writtenCount = await new Promise((resolve, reject) => {
+    if (typeof readerData.reader === 'undefined') {
+      throw new Error('reader was not defined.')
+    }
+
     const fstream = readerData.reader
       .on('error', reject)
       .pipe(lzma.createCompressor())
