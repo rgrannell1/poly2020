@@ -1,6 +1,7 @@
 
 import stream from 'stream'
-import  lzma from 'lzma-native'
+import lzma from 'lzma-native'
+import mergeStream from 'merge-stream'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -69,7 +70,7 @@ export const uniqueAsBinary = function * (iter:BinGenerator, opts:SelectUniqueOp
 }
 
 // -- tune this.
-const COORD_REPEATS = 128 * 2
+const COORD_REPEATS = 1024 * 2
 
 type EncodedIter = Generator<[number, number], void, unknown>
 type EncodedBufferIter = Generator<Buffer | undefined, void, unknown>
@@ -239,10 +240,24 @@ export const readSolutions = async function * (order:number, folder:string) {
   for (const target of targets) {
     const readStream = fs.createReadStream(path.join(folder, target), { 
       highWaterMark: COORD_REPEATS * 8
-    })
+    }).pipe(lzma.createDecompressor())
 
-    for await (const buffer of readStream) {
-      buffer.toString()
+    // -- this is an ABSURD workaround for zma-native/issues/74; it makes the stream async iterable.
+    const coords = []
+
+    for await (const buffer of mergeStream(readStream)) {
+      if (typeof buffer === 'string') {
+        continue
+      }
+
+      for (let ith = 0; ith < (buffer.length - 32); ith += 32) {
+        // -- decoding is still broken.
+
+        let x = buffer.readUInt16BE(ith)
+        let y = buffer.readUInt16BE(ith + 16)
+        console.log([x, y])
+
+      }
     }
   }
 }
