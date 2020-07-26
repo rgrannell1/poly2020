@@ -30,3 +30,15 @@ export const range = function * (lower:number, upper:number) {
     yield ith
   }
 }
+
+export const range2 = function (lower:number, upper:number) {
+  return {
+    lower,
+    upper,
+    *[Symbol.iterator]( ) {
+      for (let ith = lower; ith <= upper; ith++) {
+        yield ith
+      }
+    }
+  }
+}

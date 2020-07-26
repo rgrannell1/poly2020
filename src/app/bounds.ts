@@ -47,7 +47,7 @@ export const calculate = (solutionCount:number, order:number) => {
 }
 
 // -- todo performance is trash
-export const edgeSpace = function * (coeff:number, order:number) {
+export const edgeSpace2 = function * (coeff:number, order:number) {
   const coeffRanges = utils.repeat(() => {
     return utils.range(-coeff, +coeff)
   }, order)
@@ -67,4 +67,48 @@ export const edgeSpace = function * (coeff:number, order:number) {
       yield coord
     }
   }
+}
+
+
+function range(lower:number, upper:number) {
+  return {
+    lower,
+    upper,
+    *[Symbol.iterator]() {
+      for (let i = lower; i <= upper; i++) yield i
+    },
+  }
+}
+
+const cartesian = (ranges:any[]) => {
+  const coordinate:any = []
+
+  function* helper (dim:number, atBound:Boolean):any {
+    if (dim >= ranges.length) {
+      // -- clone coordinates and return.
+      yield coordinate.slice()
+      return
+    }
+
+    const range = dim == ranges.length-1 && !atBound
+      ? [ranges[0].lower, ranges[0].upper]
+      : ranges[dim]
+    
+      for (const coeff of range) {
+      coordinate[dim] = coeff
+      
+      let atEdge = atBound || coeff === range.lower || coeff === range.upper
+      yield* helper(dim + 1, atEdge)
+    }
+  }
+  
+  return helper(0, false)
+}
+
+export const edgeSpace = function * (coeff:number, order:number) {
+  const coeffRanges = utils.repeat(() => {
+    return utils.range2(-coeff, +coeff)
+  }, order)
+
+  yield* cartesian(coeffRanges)
 }

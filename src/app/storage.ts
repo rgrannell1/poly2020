@@ -8,7 +8,6 @@ import * as path from 'path'
 import {
   BinGenerator
 } from '../commons/types'
-import { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } from 'constants'
 
 /**
  * Convert any tiles in range to a binary string. Since this operation will be repeated billions 
@@ -188,6 +187,10 @@ export const write = async (filterIter:any, opts:WriteOpts) => {
     })
   })
 
+  if (writtenCount === 0) {
+    return
+  }
+
   // -- write metadata after so we can assume the data files are complete
   await writeMetadata(opts.metadataPath, {
     coeff: opts.coeff,
@@ -253,10 +256,8 @@ export const readSolutions = async function * (order:number, folder:string) {
       for (let ith = 0; ith < (buffer.length - 32); ith += 32) {
         // -- decoding is still broken.
 
-        let x = buffer.readUInt16BE(ith)
-        let y = buffer.readUInt16BE(ith + 16)
-        console.log([x, y])
-
+        let x:any = buffer.readUInt16BE(ith)
+        let y:any = buffer.readUInt16BE(ith + 16)
       }
     }
   }

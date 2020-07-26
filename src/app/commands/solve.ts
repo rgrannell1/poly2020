@@ -53,6 +53,7 @@ const asTile = (solution:Solution, grid:Grid):Tile => {
  * @param config 
  */
 const solvePolynomials = function * (iter:any):RootGenerator {
+  let count = 0
   for (let coords of iter) {
     yield findRoots(coords)    
   }
@@ -228,6 +229,8 @@ const solve = async (rawArgs:RawPolyArgs) => {
 
   // -- write the solutions
   for (let coeff = minCoeff; coeff <= targetCoeff; ++coeff) {
+    console.log(`${coeff} coeff`)
+
     const spaceIter = bounds.edgeSpace(coeff, order)  
     const solveIter = solvePolynomials(spaceIter)
   

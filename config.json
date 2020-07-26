@@ -13,11 +13,10 @@
     }
   },
   "jobs": {
-
     "default": {
       "template": "default",
       "polynomial": {
-        "count": 1000000000
+        "count": 10000000000
       },
       "image": {
         "outputPath": "example.png",
