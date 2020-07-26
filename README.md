@@ -25,6 +25,30 @@ poly2020 --config config.json --name default
 
 This config file can be edited or have new sections added to support new graphs.
 
+## Files
+
+```
+config.json                 configuration describing which job to run
+test/*                      assorted unit-tests and utility files for testing
+src/
+  external.d.ts             external module definitions
+  commons/
+    colours.ts              colour utility functions
+    types.ts                type-definitions reused across this project
+    utils.ts                misc. utility functions
+  cli/
+    poly.ts                 the command-line definitionand point-of-entry for running the project
+  app/
+    commands/
+      draw.ts               draw the output polynomial images for the project
+      metadata.ts           display metadata about the project, such as the number of solutions stored and size of outputs
+      solve.ts              solve polynomials and write their solutions to a series of LZMA-compressed files
+    storage/
+      binary-transcoder.ts  convert pixel-positions to and from a binary format
+      index.ts              
+  
+```
+
 ## Build
 
 Creating a flame-graph
