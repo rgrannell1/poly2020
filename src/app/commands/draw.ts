@@ -15,7 +15,7 @@ const progress = cliProgress.default
 
 
 import {
-  BinGenerator,
+  TileGenerator,
   RawPolyArgs  
 } from '../../commons/types'
 
@@ -34,7 +34,7 @@ interface SaveArgandGraphOpts {
  * 
  * @returns {Promise<any>} a result promise
  */
-const saveArgandGraph = (coords:BinGenerator, opts:SaveArgandGraphOpts):Promise<undefined> => {
+const saveArgandGraph = (coords:TileGenerator, opts:SaveArgandGraphOpts):Promise<undefined> => {
   const start = Date.now()
   const image = zeros.default([opts.resolution, opts.resolution, 4])
 

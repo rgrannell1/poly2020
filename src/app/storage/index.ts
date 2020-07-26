@@ -12,7 +12,7 @@ import {
 } from './write.js'
 
 import {
-  uniqueAsBinary
+  encodeTilesAsBinary
 } from './transform.js'
 
 const read = {
@@ -27,7 +27,7 @@ const write = {
 }
 
 const transform = {
-  uniqueAsBinary: uniqueAsBinary
+  encodeTilesAsBinary: encodeTilesAsBinary
 }
 
 const storage = {

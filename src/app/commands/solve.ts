@@ -10,7 +10,7 @@ import {
   Grid,
   Solution,
   RootGenerator,
-  BinGenerator
+  TileGenerator
 } from '../../commons/types'
 
 /**
@@ -58,7 +58,7 @@ interface BinSolutionOpts {
  * @param iter 
  * @param resolution 
  */
-function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):BinGenerator {  
+function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):TileGenerator {  
   const grid:Grid = {
     xBins: opts.resolution,
     yBins: opts.resolution,
@@ -98,7 +98,6 @@ interface RawPolyArgs {
 }
 
 const getFilePaths = (coeff:number, order:number) => {
-  const date = Date.now()
   return {
     storagePath: `data/${order}-${coeff}.bin`,
     metadataPath: `data/${order}-${coeff}.metadata.json`
@@ -132,14 +131,14 @@ const solve = async (rawArgs:RawPolyArgs) => {
     })
 
     const transcoder = new storage.BinaryTranscoder(16)
-    const filterIter = storage.transform.uniqueAsBinary(binIter, transcoder)
+    const binarySolutions = storage.transform.encodeTilesAsBinary(binIter, transcoder)
   
     const {
       storagePath,
       metadataPath
     } = getFilePaths(coeff, order)
 
-    await storage.write.solutions(filterIter, {
+    await storage.write.solutions(binarySolutions, {
       storagePath,
       metadataPath,
       coeff,

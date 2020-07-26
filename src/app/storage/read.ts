@@ -9,7 +9,7 @@ import * as path from 'path'
  * 
  * @param folder 
  */
-export const readMetadata = async (folder:string) => {
+export const readMetadata = async (folder:string):Promise<any[]> => {
   const listing = await fs.promises.readdir(folder)
   const targets = listing.filter(item => {
     return item.endsWith('metadata.json')
@@ -32,7 +32,7 @@ export const readMetadata = async (folder:string) => {
 }
 
 /**
- * Read solutions an yield them asyncronously
+ * Read solutions and yield them asyncronously
  * 
  * @param order the order of the polynomial
  * @param folder the folder to load data from
@@ -68,10 +68,10 @@ export const readSolutions = async function * (order:number, folder:string) {
 }
 
 /**
+ * Find the lowest unsolved range of coefficients based on a folder's metadata files
  * 
- * 
- * @param order 
- * @param folder 
+ * @param order the polynomial order
+ * @param folder the folder to search for solutions in
  */
 export const readStartCoefficient = async (order:number, folder:string) => {
   const results = await readMetadata(folder)

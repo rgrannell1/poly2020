@@ -8,6 +8,7 @@ export class BinaryTranscoder {
   decodings: Map<string, number>
 
   constructor (bits:number) {
+    // -- bidirectional mappingd
     this.encodings = new Map()
     this.decodings = new Map()
 

@@ -1,44 +1,6 @@
 
-import stream from 'stream'
 import lzma from 'lzma-native'
 import * as fs from 'fs'
-
-import {
-  encodedCoordsAsBuffer
-} from './transform.js'
-
-// -- TODO rename
-export const writeBinary = (iter:any, opts:Object) => {
-  interface ReaderData {
-    count: number,
-    reader?: stream.Readable
-  }
-  
-  const readerData:ReaderData = {
-    count: 0
-  } 
-
-  const chunkIter = encodedCoordsAsBuffer(iter, opts)
-
-  const reader = new stream.Readable({
-    encoding: undefined,
-    read() {
-      for (let elem of chunkIter) {
-        if (!elem) {
-          continue
-        }
-        readerData.count++
-        this.push(elem)
-      }
-
-      this.push(null)
-    }
-  })
-
-  readerData.reader = reader
-
-  return readerData
-}
 
 interface WriteOpts {
   storagePath: string,
@@ -46,6 +8,8 @@ interface WriteOpts {
   coeff: number,
   order: number
 }
+
+import * as transform from './transform.js'
 
 interface WriteMetadataOpts {
   [key:string]: any
@@ -68,11 +32,13 @@ export const writeMetadata = (fpath:string, data:WriteMetadataOpts) => {
 /**
  * Write solutions (encoded as LZMA-compressed binary data) and associated metadata to a pair of files.
  * 
- * @param filterIter 
- * @param opts 
+ * @param binarySolutions 
+ * @param opts
+ * 
+ * @return a result promise
  */
-export const writeSolutions = async (filterIter:any, opts:WriteOpts) => {
-  const readerData = writeBinary(filterIter, { })
+export const writeSolutions = async (binarySolutions:any, opts:WriteOpts) => {
+  const readerData = transform.binaryTilesAsReadStream(binarySolutions)
   const writer = fs.createWriteStream(opts.storagePath, {
     encoding: 'binary'
   })

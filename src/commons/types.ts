@@ -51,5 +51,5 @@ export interface RawPolyArgs {
 }
 
 export type RootGenerator = Generator<number[][], void, undefined>
-export type BinGenerator = Generator<Tile | undefined, void, unknown>
+export type TileGenerator = Generator<Tile | undefined, void, unknown>
 
