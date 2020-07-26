@@ -1,10 +1,9 @@
 
 import findRoots from 'durand-kerner'
 
+import storage from '../../app/storage/index.js'
 import * as bounds from '../../app/bounds.js'
-import * as storage from '../../app/storage/index.js'
 import * as configModule from '../../app/config.js'
-
 
 import {
   Tile,
@@ -117,7 +116,7 @@ const solve = async (rawArgs:RawPolyArgs) => {
   } = config.polynomial
 
   const targetCoeff = bounds.calculate(count, order)
-  const minCoeff = await storage.readStartCoefficient(order, 'data')
+  const minCoeff = await storage.read.startCoefficient(order, 'data')
 
   // -- write the solutions
   for (let coeff = minCoeff; coeff <= targetCoeff; ++coeff) {
@@ -133,14 +132,14 @@ const solve = async (rawArgs:RawPolyArgs) => {
     })
 
     const transcoder = new storage.BinaryTranscoder(16)
-    const filterIter = storage.uniqueAsBinary(binIter, transcoder)
+    const filterIter = storage.transform.uniqueAsBinary(binIter, transcoder)
   
     const {
       storagePath,
       metadataPath
     } = getFilePaths(coeff, order)
 
-    await storage.write(filterIter, {
+    await storage.write.solutions(filterIter, {
       storagePath,
       metadataPath,
       coeff,

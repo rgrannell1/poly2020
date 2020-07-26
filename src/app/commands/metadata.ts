@@ -1,5 +1,5 @@
 
-import * as storage from '../storage/index.js'
+import storage from '../storage/index.js'
 
 interface MetadataEntry {
   count: number,
@@ -15,7 +15,7 @@ interface ShowSummary {
  * Show information about the currently stored solutions
  */
 const show = async () => {
-  const results = await storage.readMetadata('data')
+  const results = await storage.read.metadata('data')
   const agg:Map<number, ShowSummary> = new Map()
 
   for (const result of results) {

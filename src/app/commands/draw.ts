@@ -1,6 +1,6 @@
 
 
-import * as storage from '../../app/storage/index.js'
+import storage from '../../app/storage/index.js'
 import * as fs from 'fs'
 import * as pixels from 'save-pixels'
 import * as zeros from 'zeros'
@@ -121,7 +121,7 @@ const draw = async (rawArgs:RawPolyArgs) => {
 
   const config = await configModule.load(configPath, name)
 
-  const solutions = await storage.readSolutions(config.polynomial.order, 'data')
+  const solutions = await storage.read.solutions(config.polynomial.order, 'data')
 
   for await (const solution of solutions) {
 
