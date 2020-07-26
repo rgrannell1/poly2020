@@ -70,7 +70,7 @@ const edgeCartesian = (ranges:any[]) => {
 
 export const edgeSpace = function * (coeff:number, order:number) {
   const coeffRanges = utils.repeat(() => {
-    return utils.range2(-coeff, +coeff)
+    return utils.range(-coeff, +coeff)
   }, order)
 
   yield* edgeCartesian(coeffRanges)

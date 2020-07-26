@@ -25,13 +25,7 @@ export const repeat = <T> (fn:() => T, count:number):T[] => {
  * 
  * @yields yields a number in the provided range
  */
-export const range = function * (lower:number, upper:number) {
-  for (let ith = lower; ith <= upper; ++ith) {
-    yield ith
-  }
-}
-
-export const range2 = function (lower:number, upper:number) {
+export const range = function (lower:number, upper:number) {
   return {
     lower,
     upper,
