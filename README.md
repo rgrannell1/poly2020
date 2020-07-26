@@ -33,15 +33,19 @@ Creating a flame-graph
 npm run perf:show
 ```
 
+## Testing
+
+
+
 ## Installation
 
 Poly can be installed using NPM
 
 ```
-npm install
+npm install github:rgrannell1/poly2020
 ```
 
-## Performance
+## Performance (Commit ID: 4d753d)
 
 | Solutions     | Time (2016)   | Time (2020)   |
 | ------------- |:-------------:| :------------:|
