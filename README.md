@@ -45,7 +45,10 @@ src/
       solve.ts              solve polynomials and write their solutions to a series of LZMA-compressed files
     storage/
       binary-transcoder.ts  convert pixel-positions to and from a binary format
-      index.ts              
+      index.ts              the "interface" file to storage; this is imported elsewhere
+      read.ts               storage read operations
+      write.ts              storage write operations
+      transform.ts          transform write operations
   
 ```
 
