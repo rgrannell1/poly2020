@@ -5,71 +5,13 @@ import mergeStream from 'merge-stream'
 import * as fs from 'fs'
 import * as path from 'path'
 
+import BT from './storage/binary-transcoder'
+
 import {
   BinGenerator
 } from '../commons/types'
 
-/**
- * Convert any tiles in range to a binary string. Since this operation will be repeated billions 
- * of times and the space is approximately 64k elements the result is memoised in a pair of maps. This
- * speeds up encoding.
- */
-export class BinaryTranscoder {
-  encodings: Map<number, string>
-  decodings: Map<string, number>
-
-  constructor (bits:number) {
-    this.encodings = new Map()
-    this.decodings = new Map()
-
-    for (let ith = 0; ith < Math.pow(2, bits); ++ith) {
-      let binary = ith.toString(2).padStart(bits, '0')
-      this.encodings.set(ith, binary)    
-      this.decodings.set(binary, ith)
-    }    
-  }
-  /**
-   * Encode a coordinate as a binary two-byte string
-   * 
-   * @param coord a single dimension between 0 and 2^16 - 1
-   */  
-  encode (coord:number):string | undefined {
-    return this.encodings.get(coord)
-  }
-  /**
-   * Decode a coordinate from a binary two-byte string
-   * 
-   * @param coord a binary string
-   */
-  decode (coord:string):number | undefined {
-    return this.decodings.get(coord)
-  }
-}
-
-interface SelectUniqueOpts {
-  resolution: number
-}
-
-export const uniqueAsBinary = function * (iter:BinGenerator, transcoder:BinaryTranscoder, opts:SelectUniqueOpts) {
-  let filter:Set<String> = new Set()
-
-  for (const coord of iter) {
-    if (!coord) {
-      yield
-    } else {
-      const xp = transcoder.encode(coord.x)
-      const yp = transcoder.encode(coord.y)
-      const key = `${xp}${yp}`
-  
-      if (filter.has(key)) {
-        yield 
-      } else {
-        filter.add(key)
-        yield [xp, yp]
-      }
-    }
-  }
-}
+export const BinaryTranscoder = BT
 
 // -- tune this.
 const COORD_REPEATS = 1024 * 2
@@ -84,7 +26,7 @@ type EncodedBufferIter = Generator<Buffer | undefined, void, unknown>
  * @param iter the iterator yielding 
  * @param opts 
  */
-const yieldBinaryBuffers = function * (iter:EncodedIter, opts:Object):EncodedBufferIter {
+const encodedCoordsAsBuffer = function * (iter:EncodedIter, opts:Object):EncodedBufferIter {
   let parts = []
   
   for (const coord of iter) {
@@ -111,7 +53,7 @@ export const writeBinary = (iter:any, opts:Object) => {
     count: 0
   } 
 
-  const chunkIter = yieldBinaryBuffers(iter, opts)
+  const chunkIter = encodedCoordsAsBuffer(iter, opts)
 
   const reader = new stream.Readable({
     encoding: undefined,
@@ -261,6 +203,27 @@ export const readSolutions = async function * (order:number, folder:string) {
 
         let x:any = buffer.readUInt16BE(ith)
         let y:any = buffer.readUInt16BE(ith + 16)
+      }
+    }
+  }
+}
+
+export const uniqueAsBinary = function * (iter:BinGenerator, transcoder:BT) {
+  let filter:Set<String> = new Set()
+
+  for (const coord of iter) {
+    if (!coord) {
+      yield
+    } else {
+      const xp = transcoder.encode(coord.x)
+      const yp = transcoder.encode(coord.y)
+      const key = `${xp}${yp}`
+  
+      if (filter.has(key)) {
+        yield 
+      } else {
+        filter.add(key)
+        yield [xp, yp]
       }
     }
   }
