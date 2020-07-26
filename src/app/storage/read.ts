@@ -4,9 +4,6 @@ import mergeStream from 'merge-stream'
 import * as fs from 'fs'
 import * as path from 'path'
 
-// -- tune this.
-const COORD_REPEATS = 1024 * 2
-
 /**
  * Read all metadata files from a folder.
  * 
@@ -49,9 +46,8 @@ export const readSolutions = async function * (order:number, folder:string) {
   })
 
   for (const target of targets) {
-    const readStream = fs.createReadStream(path.join(folder, target), { 
-      highWaterMark: COORD_REPEATS * 8
-    }).pipe(lzma.createDecompressor())
+    const readStream = fs.createReadStream(path.join(folder, target))
+      .pipe(lzma.createDecompressor())
 
     // -- this is an ABSURD workaround for zma-native/issues/74; it makes the stream async iterable.
     const coords = []

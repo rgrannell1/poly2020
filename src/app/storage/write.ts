@@ -23,8 +23,6 @@ export const writeBinary = (iter:any, opts:Object) => {
   const reader = new stream.Readable({
     encoding: undefined,
     read() {
-      let result
-
       for (let elem of chunkIter) {
         if (!elem) {
           continue
