@@ -4,6 +4,10 @@ import {
   BinGenerator
 } from '../../commons/types'
 
+import {
+  WRITE_SOLUTION_BUFFER_SIZE
+} from '../../commons/constants.js'
+
 export const uniqueAsBinary = function * (iter:BinGenerator, transcoder:BinaryTranscoder) {
   let filter:Set<String> = new Set()
 
@@ -25,9 +29,6 @@ export const uniqueAsBinary = function * (iter:BinGenerator, transcoder:BinaryTr
   }
 }
 
-// -- tune this.
-const COORD_REPEATS = 1024 * 2
-
 type EncodedIter = Generator<[number, number], void, unknown>
 type EncodedBufferIter = Generator<Buffer | undefined, void, unknown>
 
@@ -45,7 +46,7 @@ export const encodedCoordsAsBuffer = function * (iter:EncodedIter, opts:Object):
     if (coord) {
       parts.push(coord[0], coord[1])
 
-      if (parts.length > COORD_REPEATS) {
+      if (parts.length > WRITE_SOLUTION_BUFFER_SIZE) {
         yield Buffer.from(parts.join(''), 'binary')
         parts = []
       }
