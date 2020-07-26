@@ -1,6 +1,6 @@
 
 
-import * as storage from '../../app/storage.js'
+import * as storage from '../../app/storage/index.js'
 import * as configModule from '../../app/config.js'
 
 import {

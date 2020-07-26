@@ -10,7 +10,7 @@ import findRoots from 'durand-kerner'
 
 import * as colours from '../../app/colours.js'
 import * as bounds from '../../app/bounds.js'
-import * as storage from '../../app/storage.js'
+import * as storage from '../../app/storage/index.js'
 import * as configModule from '../../app/config.js'
 import * as diff from '../../app/diff.js'
 import deepmerge from 'deepmerge'
@@ -241,9 +241,7 @@ const solve = async (rawArgs:RawPolyArgs) => {
     })
 
     const transcoder = new storage.BinaryTranscoder(16)
-    const filterIter = storage.uniqueAsBinary(binIter, transcoder, {
-      resolution: config.image.resolution
-    })
+    const filterIter = storage.uniqueAsBinary(binIter, transcoder)
   
     const {
       storagePath,

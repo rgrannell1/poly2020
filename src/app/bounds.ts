@@ -1,6 +1,5 @@
 
 import * as utils from '../commons/utils.js'
-import itools from 'iter-tools'
 
 /**
  * Calculate the number of solutions generated, given an upper bound coefficient
@@ -11,7 +10,7 @@ import itools from 'iter-tools'
  * 
  * @returns the total number of solutions required
  */
-export const totalSolutions = (count:number, order:number) => {
+export const totalSolutions = (count:number, order:number):number => {
   const coeff = calculate(count, order)
   const rangeLength = (2 * coeff) + 1
   const totalEquations = Math.pow(rangeLength, order)
@@ -28,12 +27,9 @@ export const totalSolutions = (count:number, order:number) => {
  * @param solutionCount the desired number of solutions
  * @param order the order of the polynomial. 
  *   
+ * @returns the bound needed to generate the required solutions
  */
-export const calculate = (solutionCount:number, order:number) => {
-  if (!order) {
-    throw new Error('order was invalid.')
-  }
-
+export const calculate = (solutionCount:number, order:number):number => {
   // -- inefficient but avoids another equation.
   for (let count = 1; true; count += 1) {
     let rangeLength = count
@@ -46,7 +42,7 @@ export const calculate = (solutionCount:number, order:number) => {
   }
 }
 
-const cartesian = (ranges:any[]) => {
+const edgeCartesian = (ranges:any[]) => {
   const coordinate:any = []
 
   function* helper (dim:number, atBound:Boolean):any {
@@ -76,5 +72,5 @@ export const edgeSpace = function * (coeff:number, order:number) {
     return utils.range2(-coeff, +coeff)
   }, order)
 
-  yield* cartesian(coeffRanges)
+  yield* edgeCartesian(coeffRanges)
 }

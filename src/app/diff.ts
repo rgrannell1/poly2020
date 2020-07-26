@@ -1,5 +1,5 @@
 
-import * as storage from '../app/storage.js'
+import * as storage from '../app/storage/index.js'
 
 export const solved = async (order:number, folder:string) => {
   const results = await storage.readMetadata(folder)

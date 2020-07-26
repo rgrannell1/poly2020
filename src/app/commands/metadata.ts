@@ -1,5 +1,5 @@
 
-import * as storage from '../storage.js'
+import * as storage from '../storage/index.js'
 
 interface MetadataEntry {
   count: number,

@@ -5,11 +5,11 @@ import mergeStream from 'merge-stream'
 import * as fs from 'fs'
 import * as path from 'path'
 
-import BT from './storage/binary-transcoder'
+import BT from './binary-transcoder.js'
 
 import {
   BinGenerator
-} from '../commons/types'
+} from '../../commons/types'
 
 export const BinaryTranscoder = BT
 

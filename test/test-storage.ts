@@ -1,7 +1,7 @@
 
 import chai from 'chai'
 
-import * as storage from '../src/app/storage.js'
+import * as storage from '../src/app/storage/binary-transcoder'
 
 const testBinaryTranscoderOperations = () => {
   const transcoder = new storage.BinaryTranscoder(4)
