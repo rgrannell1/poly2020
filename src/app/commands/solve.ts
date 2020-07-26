@@ -8,7 +8,7 @@ import  signale from 'signale'
 
 import findRoots from 'durand-kerner'
 
-import * as colours from '../../app/colours.js'
+import * as colours from '../../commons/colours.js'
 import * as bounds from '../../app/bounds.js'
 import * as storage from '../../app/storage/index.js'
 import * as configModule from '../../app/config.js'
