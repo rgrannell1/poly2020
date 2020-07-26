@@ -46,40 +46,6 @@ export const calculate = (solutionCount:number, order:number) => {
   }
 }
 
-// -- todo performance is trash
-export const edgeSpace2 = function * (coeff:number, order:number) {
-  const coeffRanges = utils.repeat(() => {
-    return utils.range(-coeff, +coeff)
-  }, order)
-
-  const product:any = itools.product(...coeffRanges)
-
-  for (const coord of product) {
-    let isEdge = false
-    for (const subCoeff of coord) {
-      if (subCoeff === -coeff || subCoeff === coeff) {
-        isEdge = true
-        break
-      }
-    }
-
-    if (isEdge) {
-      yield coord
-    }
-  }
-}
-
-
-function range(lower:number, upper:number) {
-  return {
-    lower,
-    upper,
-    *[Symbol.iterator]() {
-      for (let i = lower; i <= upper; i++) yield i
-    },
-  }
-}
-
 const cartesian = (ranges:any[]) => {
   const coordinate:any = []
 
@@ -90,15 +56,15 @@ const cartesian = (ranges:any[]) => {
       return
     }
 
-    const range = dim == ranges.length-1 && !atBound
+    const range = dim == ranges.length - 1 && !atBound
       ? [ranges[0].lower, ranges[0].upper]
       : ranges[dim]
     
       for (const coeff of range) {
-      coordinate[dim] = coeff
+        coordinate[dim] = coeff
       
-      let atEdge = atBound || coeff === range.lower || coeff === range.upper
-      yield* helper(dim + 1, atEdge)
+        let atEdge = atBound || coeff === range.lower || coeff === range.upper
+        yield* helper(dim + 1, atEdge)
     }
   }
   

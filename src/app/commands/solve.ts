@@ -239,8 +239,9 @@ const solve = async (rawArgs:RawPolyArgs) => {
       xBounds: config.image.bounds.x,
       yBounds: config.image.bounds.y
     })
-  
-    const filterIter = storage.uniqueAsBinary(binIter, {
+
+    const transcoder = new storage.BinaryTranscoder(16)
+    const filterIter = storage.uniqueAsBinary(binIter, transcoder, {
       resolution: config.image.resolution
     })
   

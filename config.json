@@ -42,7 +42,7 @@
     "profile": {
       "template": "default",
       "polynomial": {
-        "count": 10000000
+        "count": 1000000
       },
       "image": {
         "outputPath": "example.png",
