@@ -12,8 +12,6 @@ import * as colours from '../../commons/colours.js'
 import * as bounds from '../../app/bounds.js'
 import * as storage from '../../app/storage/index.js'
 import * as configModule from '../../app/config.js'
-import * as diff from '../../app/diff.js'
-import deepmerge from 'deepmerge'
 
 const progress = cliProgress.default
 
@@ -225,7 +223,7 @@ const solve = async (rawArgs:RawPolyArgs) => {
   } = config.polynomial
 
   const targetCoeff = bounds.calculate(count, order)
-  const minCoeff = await diff.solved(order, 'data')
+  const minCoeff = await storage.readStartCoefficient(order, 'data')
 
   // -- write the solutions
   for (let coeff = minCoeff; coeff <= targetCoeff; ++coeff) {

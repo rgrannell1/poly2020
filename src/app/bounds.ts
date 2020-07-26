@@ -1,5 +1,6 @@
 
 import * as utils from '../commons/utils.js'
+import * as storage from '../app/storage/index.js'
 
 /**
  * Calculate the number of solutions generated, given an upper bound coefficient

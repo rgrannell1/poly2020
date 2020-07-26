@@ -228,3 +228,23 @@ export const uniqueAsBinary = function * (iter:BinGenerator, transcoder:BT) {
     }
   }
 }
+
+/**
+ * 
+ * 
+ * @param order 
+ * @param folder 
+ */
+export const readStartCoefficient = async (order:number, folder:string) => {
+  const results = await readMetadata(folder)
+
+  const maxCurrentOrder = results
+    .filter(result => result.order === order)  
+    .reduce((acc, curr) => {
+      return curr.coeff > acc
+        ? curr.coeff
+        : acc
+      }, 1)
+
+  return maxCurrentOrder + 1
+} 

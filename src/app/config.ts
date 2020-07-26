@@ -3,6 +3,12 @@ import * as path from 'path'
 import * as fs from 'fs'
 import deepmerge from 'deepmerge'
 
+/**
+ * Load and validate configuration for this program
+ * 
+ * @param configPath the path to the configuration
+ * @param name the named section inside this configuration
+ */
 export const load = async (configPath:string, name:string) => {
   let configs
   
