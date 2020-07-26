@@ -21,6 +21,7 @@
   "author": "Róisín Grannell",
   "license": "MIT",
   "dependencies": {
+    "@types/chai": "^4.2.12",
     "@types/deepmerge": "^2.2.0",
     "@types/docopt": "^0.6.31",
     "@types/merge-stream": "^1.1.2",
