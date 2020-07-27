@@ -72,11 +72,11 @@ Poly can be installed using NPM
 npm install github:rgrannell1/poly2020
 ```
 
-## Performance (Commit ID: 4d753d)
+## Performance 
 
-| Solutions     | Time (2016)   | Time (2020)   |
+| Solutions     | Time (2016)   | `4d753d`      |
 | ------------- |:-------------:| :------------:|
-| ten thousand  | 1 second      | 0.01 seconds  |
+| ten thousand  | 1 second      | 0.01 seconds  | 
 | ten million   | 16 minutes    | 17 seconds    |
 | one billion   | 1.15 days     | 30 minutes    |
 | one trillion  | new laptop 🙁 | 20 days       |
