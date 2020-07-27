@@ -2,13 +2,6 @@
 import lzma from 'lzma-native'
 import * as fs from 'fs'
 
-interface WriteOpts {
-  storagePath: string,
-  metadataPath: string,
-  coeff: number,
-  order: number
-}
-
 import * as transform from './transform.js'
 
 interface WriteMetadataOpts {
@@ -29,6 +22,13 @@ export const writeMetadata = (fpath:string, data:WriteMetadataOpts) => {
   return fs.promises.writeFile(fpath, stringify)
 }
 
+interface WriteSolutionOpts {
+  storagePath: string,
+  metadataPath: string,
+  coeff: number,
+  order: number
+}
+
 /**
  * Write solutions (encoded as LZMA-compressed binary data) and associated metadata to a pair of files.
  * 
@@ -37,8 +37,8 @@ export const writeMetadata = (fpath:string, data:WriteMetadataOpts) => {
  * 
  * @return a result promise
  */
-export const writeSolutions = async (binarySolutions:any, opts:WriteOpts) => {
-  const readerData = transform.binaryTilesAsReadStream(binarySolutions)
+export const writeSolutions = async (binarySolutions:any, opts:WriteSolutionOpts) => {
+  const readerData = transform.binaryPixelsAsReadStream(binarySolutions)
   const writer = fs.createWriteStream(opts.storagePath, {
     encoding: 'binary'
   })

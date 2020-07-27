@@ -6,7 +6,6 @@ import {
 /**
  * Calculate a hue value
  * 
- * @param tile 
  */
 export const hue = (count: number, total: number):Colour => {
 	let index = Math.floor((count / total) * Math.pow(255, 3))

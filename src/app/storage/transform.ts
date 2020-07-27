@@ -1,8 +1,8 @@
 
 import stream from 'stream'
-import BinaryTranscoder from './binary-transcoder'
+import BinaryTranscoder from './binary-transcoder.js'
 import {
-  TileGenerator
+  PixelGenerator
 } from '../../commons/types'
 
 import {
@@ -17,30 +17,37 @@ import {
  * @param iter 
  * @param transcoder 
  */
-export const encodeTilesAsBinary = function * (iter:TileGenerator, transcoder:BinaryTranscoder) {
+export const encodePixelsAsBinary = function * (iter:PixelGenerator, transcoder:BinaryTranscoder) {
   let filter:Set<String> = new Set()
 
-  for (const coord of iter) {
-    if (!coord) {
-      yield
-    } else {
-      const xp = transcoder.encode(coord.x)
-      const yp = transcoder.encode(coord.y)
-      const key = `${xp}${yp}`
-  
-      if (filter.has(key)) {
-        yield 
-      } else {
-        filter.add(key)
-        yield [xp, yp]
-      }
+  for (const stretch of iter) {
+    if (!stretch) {
+      continue
     }
+    const buffer = []
+
+    for (const coord of stretch) {
+      if (!coord) {
+        yield
+      } else {
+        const xp = transcoder.encode(coord.x)
+        const yp = transcoder.encode(coord.y)
+        const key = `${xp}${yp}`
+    
+        if (!filter.has(key)) {
+          filter.add(key)
+          buffer.push([xp, yp])
+        }
+      }
+    }  
+
+    yield buffer
   }
 }
 
 // TODO check if this should be [string, string]
 type EncodedIter = Generator<[number, number], void, unknown>
-type EncodedBufferIter = Generator<Buffer | undefined, void, unknown>
+type EncodedBufferIter = Generator<Buffer[] | undefined, void, unknown>
 
 /**
  * Receive a generator of binary-encoded xy pairs, and yield binary-buffers
@@ -49,21 +56,27 @@ type EncodedBufferIter = Generator<Buffer | undefined, void, unknown>
  * @param iter the iterator yielding 
  * @param opts 
  */
-export const encodeBinaryTilesAsBuffer = function * (iter:EncodedIter):EncodedBufferIter {
+export const encodeBinaryPixelsAsBuffer = function * (iter:any):EncodedBufferIter {
   let parts = []
-  
-  for (const coord of iter) {
-    if (coord) {
-      parts.push(coord[0], coord[1])
 
-      if (parts.length > WRITE_SOLUTION_BUFFER_SIZE) {
-        yield Buffer.from(parts.join(''), 'binary')
-        parts = []
+  for (const stretch of iter) {
+    const buffer = []
+
+    for (const coord of stretch) {
+      if (coord) {
+        parts.push(coord[0], coord[1])
+  
+        if (parts.length > WRITE_SOLUTION_BUFFER_SIZE) {
+          buffer.push(Buffer.from(parts.join(''), 'binary'))
+          parts = []
+        }
+      } else {
+        yield
       }
-    } else {
-      yield
-    }
-  }
+    }  
+
+    yield buffer
+  } 
 }
 
 interface ReaderData {
@@ -74,23 +87,30 @@ interface ReaderData {
 /**
  * Convert an iterator of binary-encoded [x, y] arrays to a ReadStream.
  * 
- * @param binaryTiles an iterator of binary-encoded [x, y] arrays
+ * @param binaryPixels an iterator of binary-encoded [x, y] arrays
  */
-export const binaryTilesAsReadStream = (binaryTiles:EncodedIter):ReaderData => {  
+export const binaryPixelsAsReadStream = (binaryPixels:EncodedIter):ReaderData => {  
   const readerData:ReaderData = {
     count: 0
   } 
-
-  const bufferIter = encodeBinaryTilesAsBuffer(binaryTiles)
+  
+  const bufferIter = encodeBinaryPixelsAsBuffer(binaryPixels)
   const reader = new stream.Readable({
     encoding: undefined,
     read() {
-      for (let elem of bufferIter) {
-        if (!elem) {
+      for (let stretch of bufferIter) {
+        if (!stretch) {
           continue
         }
-        readerData.count++
-        this.push(elem)
+        
+        for (let buff of stretch) {
+          if (!buff) {
+            continue
+          }
+  
+          readerData.count += BinaryTranscoder.count(buff, 2)
+          this.push(buff)
+        }  
       }
 
       this.push(null)

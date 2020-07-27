@@ -37,7 +37,7 @@ export const readMetadata = async (folder:string):Promise<any[]> => {
  * @param order the order of the polynomial
  * @param folder the folder to load data from
  * 
- * Asyncronously yields arrays of tiles
+ * Asyncronously yields arrays of pixels
  */
 export const readSolutions = async function * (order:number, folder:string) {
   const listing = await fs.promises.readdir(folder)
@@ -86,3 +86,13 @@ export const readStartCoefficient = async (order:number, folder:string) => {
 
   return maxCurrentOrder + 1
 } 
+
+export const readSolvedCount = async (order:number, folder:string) => {
+  const results = await readMetadata(folder)
+
+  return results
+    .filter(result => result.order === order)  
+    .reduce((acc, curr) => {
+      return acc + curr.count 
+    }, 0)
+}

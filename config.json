@@ -6,8 +6,8 @@
       },
       "image": {
         "bounds": {
-          "x": [-3, 3],
-          "y": [-3, 3]
+          "x": [-10, 10],
+          "y": [-10, 10]
         }
       }
     }
@@ -42,7 +42,7 @@
     "profile": {
       "template": "default",
       "polynomial": {
-        "count": 1000000
+        "count": 500000
       },
       "image": {
         "outputPath": "example.png",

@@ -2,14 +2,17 @@
 import * as path from 'path'
 import * as fs from 'fs'
 import deepmerge from 'deepmerge'
+import { ConfigSection } from '../commons/types'
 
 /**
  * Load and validate configuration for this program
  * 
  * @param configPath the path to the configuration
  * @param name the named section inside this configuration
+ * 
+ * @returns a promise yielding configuration
  */
-export const load = async (configPath:string, name:string) => {
+export const load = async (configPath:string, name:string):Promise<ConfigSection> => {
   let configs
   
   try {

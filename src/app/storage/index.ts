@@ -3,7 +3,8 @@ import BT from './binary-transcoder.js'
 import {
   readMetadata,
   readSolutions,
-  readStartCoefficient
+  readStartCoefficient,
+  readSolvedCount
 } from './read.js'
 
 import {
@@ -12,13 +13,14 @@ import {
 } from './write.js'
 
 import {
-  encodeTilesAsBinary
+  encodePixelsAsBinary
 } from './transform.js'
 
 const read = {
   metadata: readMetadata,
   solutions: readSolutions,
-  startCoefficient: readStartCoefficient
+  startCoefficient: readStartCoefficient,
+  solvedCount: readSolvedCount
 }
 
 const write = {
@@ -27,7 +29,7 @@ const write = {
 }
 
 const transform = {
-  encodeTilesAsBinary: encodeTilesAsBinary
+  encodePixelsAsBinary: encodePixelsAsBinary
 }
 
 const storage = {

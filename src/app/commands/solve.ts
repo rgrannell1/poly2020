@@ -2,15 +2,16 @@
 import findRoots from 'durand-kerner'
 
 import storage from '../../app/storage/index.js'
-import * as bounds from '../../app/bounds.js'
+import CoefficientSpace from '../coefficient-space.js'
 import * as configModule from '../../app/config.js'
+import SolveProgress from '../progress/solve-progress.js'
 
 import {
-  Tile,
+  Pixel,
   Grid,
   Solution,
   RootGenerator,
-  TileGenerator
+  PixelGenerator
 } from '../../commons/types'
 
 /**
@@ -19,7 +20,7 @@ import {
  * @param solution 
  * @param grid 
  */
-const asTile = (solution:Solution, grid:Grid):Tile => {
+const asPixel = (solution:Solution, grid:Grid):Pixel => {
   // -- calculate the size of a bin.
   const xDiff = (grid.xBounds[1] -grid.xBounds[0]) / grid.xBins
   
@@ -39,11 +40,29 @@ const asTile = (solution:Solution, grid:Grid):Tile => {
  * 
  * @param config 
  */
-const solvePolynomials = function * (iter:any):RootGenerator {
-  let count = 0
+const solvePolynomials = function * (iter:any, bar:SolveProgress):RootGenerator {
+  let count = bar.count
+  let buffer = []
+
   for (let coords of iter) {
-    yield findRoots(coords)    
+    const data = findRoots(coords)    
+    count += 4 // -- remove hardcoding!
+
+    if (count % 100_000 === 0) {     
+      bar.update(count)
+    }
+
+    buffer.push(data)
+
+    if (buffer.length > 100_000) {
+      bar.update(count)
+      yield buffer
+      buffer = []
+    }
   }
+  bar.update(count)
+
+  yield buffer
 }
 
 interface BinSolutionOpts {
@@ -58,7 +77,7 @@ interface BinSolutionOpts {
  * @param iter 
  * @param resolution 
  */
-function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):TileGenerator {  
+function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):PixelGenerator {  
   const grid:Grid = {
     xBins: opts.resolution,
     yBins: opts.resolution,
@@ -66,28 +85,34 @@ function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):TileGenerator
     yBounds: opts.yBounds
   }
 
-  // -- zip the real and imag parts
-  for (const [real, imag] of iter) {
-    for (let ith = 0; ith < real.length; ++ith) {
-      const x = real[ith]
-      const y = imag[ith]
+  for (const coord of iter) {
+    const buffer = []
 
-      // -- discard missing solutions
-      if (Number.isNaN(x) || Number.isNaN(y)) {
-        // -- yield empty rather than continue to make the progress-bar accurate.
-        yield 
-      } else {
-        // -- convert the coordinates into 0...resolution pixel-space
-        const coord = asTile([x, y], grid)
+    // -- zip the real and imag parts
+    for (const [real, imag] of coord) {
+      for (let ith = 0; ith < real.length; ++ith) {
+        const x = real[ith]
+        const y = imag[ith]
 
-        // -- discard solutions out of bounds.
-        if (coord.x < 0 || coord.x > grid.xBins || coord.y < 0 || coord.y > grid.yBins) {
-          yield
+        // -- discard missing solutions
+        if (Number.isNaN(x) || Number.isNaN(y)) {
+          // -- yield empty rather than continue to make the progress-bar accurate.
+           
         } else {
-          yield coord
+          // -- convert the coordinates into 0...resolution pixel-space
+          const coord = asPixel([x, y], grid)
+
+          // -- discard solutions out of bounds.
+          if (coord.x < 0 || coord.x > grid.xBins || coord.y < 0 || coord.y > grid.yBins) {
+
+          } else {
+            buffer.push(coord)
+          }
         }
       }
     }
+
+    yield buffer
   }
 }
 
@@ -114,15 +139,18 @@ const solve = async (rawArgs:RawPolyArgs) => {
     order
   } = config.polynomial
 
-  const targetCoeff = bounds.calculate(count, order)
+  const targetCoeff = CoefficientSpace.requiredSize(count, order)
   const minCoeff = await storage.read.startCoefficient(order, 'data')
+
+  const bar = new SolveProgress()  
+  const solutions = CoefficientSpace.solutions(targetCoeff, order)
+
+  await bar.start(order, solutions, 'data')
 
   // -- write the solutions
   for (let coeff = minCoeff; coeff <= targetCoeff; ++coeff) {
-    console.log(`${coeff} coeff`)
-
-    const spaceIter = bounds.edgeSpace(coeff, order)  
-    const solveIter = solvePolynomials(spaceIter)
+    const space = CoefficientSpace.enumerateEdges(coeff, order)  
+    const solveIter = solvePolynomials(space, bar)
   
     const binIter = binSolutions(solveIter, {
       resolution: config.image.resolution,
@@ -131,7 +159,7 @@ const solve = async (rawArgs:RawPolyArgs) => {
     })
 
     const transcoder = new storage.BinaryTranscoder(16)
-    const binarySolutions = storage.transform.encodeTilesAsBinary(binIter, transcoder)
+    const binarySolutions = storage.transform.encodePixelsAsBinary(binIter, transcoder)
   
     const {
       storagePath,

@@ -8,7 +8,7 @@ import {
 } from '../commons/types'
 
 /**
- * The core application
+ * The core application. Solve and draw polynomials, and show metadata about stored solutions
  * 
  * @param rawArgs arguments provided by the CLI interface 
  */

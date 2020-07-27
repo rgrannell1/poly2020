@@ -37,7 +37,7 @@ src/
     types.ts                type-definitions reused across this project
     utils.ts                misc. utility functions
   cli/
-    poly.ts                 the command-line definitionand point-of-entry for running the project
+    poly.ts                 the command-line definition and point-of-entry for running the project
   app/
     commands/
       draw.ts               draw the output polynomial images for the project
@@ -49,7 +49,9 @@ src/
       read.ts               storage read operations
       write.ts              storage write operations
       transform.ts          transform write operations
-  
+    bounds.ts               
+    config.ts               read and valdiate poly configuration
+    poly.ts                 accepts command-line arguments and calls underlying commands in commands/
 ```
 
 ## Build
@@ -61,8 +63,6 @@ npm run perf:show
 ```
 
 ## Testing
-
-
 
 ## Installation
 

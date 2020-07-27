@@ -1,7 +1,7 @@
 
 export type Colour = [number, number, number, number]
 
-export interface Tile {
+export interface Pixel {
   x: number,
   y: number
 }
@@ -50,6 +50,6 @@ export interface RawPolyArgs {
   show: Boolean
 }
 
-export type RootGenerator = Generator<number[][], void, undefined>
-export type TileGenerator = Generator<Tile | undefined, void, unknown>
+export type RootGenerator = Generator<number[][][], void, undefined>
+export type PixelGenerator = Generator<Pixel[] | undefined, void, unknown>
 

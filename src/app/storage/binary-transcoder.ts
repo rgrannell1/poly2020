@@ -1,5 +1,5 @@
 /**
- * Convert any tiles in range to a binary string. Since this operation will be repeated billions 
+ * Convert any pixels in range to a binary string. Since this operation will be repeated billions 
  * of times and the space is approximately 64k elements the result is memoised in a pair of maps. This
  * speeds up encoding.
  */
@@ -33,6 +33,9 @@ export class BinaryTranscoder {
    */
   decode (coord:string):number | undefined {
     return this.decodings.get(coord)
+  }
+  static count (buffer:Buffer, bytes:number) {
+    return buffer.length / bytes
   }
 }
 
