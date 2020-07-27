@@ -51,7 +51,7 @@ export const writeSolutions = async (binarySolutions:any, opts:WriteSolutionOpts
 
     const fstream = readerData.reader
       .on('error', reject)
-      .pipe(lzma.createCompressor())
+      //.pipe(lzma.createCompressor())
       .on('error', reject)
       .pipe(writer)
       .on('error', reject)

@@ -24,60 +24,36 @@ export const encodePixelsAsBinary = function * (iter:PixelGenerator, transcoder:
     if (!stretch) {
       continue
     }
-    const buffer = []
+    const unique = []
 
     for (const coord of stretch) {
       if (!coord) {
         yield
       } else {
-        const xp = transcoder.encode(coord.x)
-        const yp = transcoder.encode(coord.y)
-        const key = `${xp}${yp}`
+        const x = coord.x
+        const y = coord.y
+        const key = `${x}${y}`
     
         if (!filter.has(key)) {
           filter.add(key)
-          buffer.push([xp, yp])
+          unique.push(x, y)
         }
       }
     }  
+
+    const buffer = Buffer.alloc(2 * 2 * unique.length)
+
+    let idx = 0
+    for (const num of unique) {
+      idx = buffer.writeUInt16BE(num, idx)
+    }
 
     yield buffer
   }
 }
 
 // TODO check if this should be [string, string]
-type EncodedIter = Generator<[number, number], void, unknown>
-type EncodedBufferIter = Generator<Buffer[] | undefined, void, unknown>
-
-/**
- * Receive a generator of binary-encoded xy pairs, and yield binary-buffers
- * containing data to store. 
- * 
- * @param iter the iterator yielding 
- * @param opts 
- */
-export const encodeBinaryPixelsAsBuffer = function * (iter:any):EncodedBufferIter {
-  let parts = []
-
-  for (const stretch of iter) {
-    const buffer = []
-
-    for (const coord of stretch) {
-      if (coord) {
-        parts.push(coord[0], coord[1])
-  
-        if (parts.length > WRITE_SOLUTION_BUFFER_SIZE) {
-          buffer.push(Buffer.from(parts.join(''), 'binary'))
-          parts = []
-        }
-      } else {
-        yield
-      }
-    }  
-
-    yield buffer
-  } 
-}
+type EncodedIter = Generator<Buffer, void, unknown>
 
 interface ReaderData {
   count: number,
@@ -94,23 +70,16 @@ export const binaryPixelsAsReadStream = (binaryPixels:EncodedIter):ReaderData =>
     count: 0
   } 
   
-  const bufferIter = encodeBinaryPixelsAsBuffer(binaryPixels)
   const reader = new stream.Readable({
     encoding: undefined,
     read() {
-      for (let stretch of bufferIter) {
-        if (!stretch) {
+      for (let buff of binaryPixels) {
+        if (!buff) {
           continue
         }
-        
-        for (let buff of stretch) {
-          if (!buff) {
-            continue
-          }
-  
-          readerData.count += BinaryTranscoder.count(buff, 2)
-          this.push(buff)
-        }  
+
+        readerData.count += BinaryTranscoder.count(buff, 2)
+        this.push(buff)        
       }
 
       this.push(null)

@@ -1,4 +1,5 @@
 
+import { PassThrough }  from 'stream'
 import lzma from 'lzma-native'
 import mergeStream from 'merge-stream'
 import * as fs from 'fs'
@@ -46,23 +47,22 @@ export const readSolutions = async function * (order:number, folder:string) {
   })
 
   for (const target of targets) {
+    const pass = new PassThrough()
     const readStream = fs.createReadStream(path.join(folder, target))
-      .pipe(lzma.createDecompressor())
+      .on('error', err => {
+        throw err
+      })
+      // -- TODO .pipe(lzma.createDecompressor())
+      .pipe(pass)
 
-    // -- this is an ABSURD workaround for zma-native/issues/74; it makes the stream async iterable.
-    const coords = []
+    // -- this is an dumb workaround for zma-native/issues/74; it makes the stream async iterable.
+    let idx = 0
+    for await (const buffer of readStream) {
+      const x = buffer.readUInt16BE(idx)
+      const y = buffer.readUInt16BE(idx + 2)
+      idx += 4
 
-    for await (const buffer of mergeStream(readStream)) {
-      if (typeof buffer === 'string') {
-        continue
-      }
-
-      for (let ith = 0; ith < (buffer.length - 32); ith += 32) {
-        // -- decoding is still broken.
-
-        let x:any = buffer.readUInt16BE(ith)
-        let y:any = buffer.readUInt16BE(ith + 16)
-      }
+      yield {x, y}
     }
   }
 }
