@@ -65,10 +65,19 @@ export const writeSolutions = async (binarySolutions:any, opts:WriteSolutionOpts
     return
   }
 
+  // -- get the size of the file
+  const stat = await fs.promises.lstat(opts.storagePath)
+
   // -- write metadata after so we can assume the data files are complete
   await writeMetadata(opts.metadataPath, {
     coeff: opts.coeff,
     order: opts.order,
-    count: writtenCount
+    count: writtenCount,
+    storagePath: opts.storagePath,
+    size: {
+      gb: stat.size / 1e9,
+      mb: stat.size / 1e6,
+      tb: stat.size / 1e12  
+    }
   })
 }

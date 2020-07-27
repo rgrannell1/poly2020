@@ -8,7 +8,10 @@ interface MetadataEntry {
 }
 
 interface ShowSummary {
-  count: number
+  count: number,
+  mb: number,
+  gb: number,
+  tb: number
 }
 
 /**
@@ -19,13 +22,23 @@ const show = async () => {
   const agg:Map<number, ShowSummary> = new Map()
 
   for (const result of results) {
+
+    await result.storagePath
+
     const current = agg.get(result.order)
 
     if (current) {
       current.count += result.count
+      current.mb += result.size.mb
+      current.gb += result.size.gb
+      current.tb += result.size.tb
+
     } else {
       agg.set(result.order, {
-        count: result.count
+        count: result.count,
+        mb: result.size.mb,
+        gb: result.size.gb,
+        tb: result.size.tb
       })
     }
   }
@@ -35,8 +48,13 @@ const show = async () => {
       return elem0[0] - elem1[0]
     })
 
-  for (const [order, xxxx] of sortedByOrder) {
-    console.log(`${order}th-order equations: ${xxxx.count.toLocaleString()} solutions`)
+  for (const [order, orderData] of sortedByOrder) {
+    let message = `${order}th-order equations: ${orderData.count.toLocaleString()} solutions\n`
+    message += `  ${orderData.mb} mb\n`
+    message += `  ${orderData.gb} gb\n`
+    message += `  ${orderData.tb} tb\n`
+    
+    console.log(message)
   }
 }
 
