@@ -41,22 +41,22 @@ export const readMetadata = async (folder:string):Promise<any[]> => {
  * Asyncronously yields arrays of pixels
  */
 export const readSolutions = async function * (order:number, folder:string) {
-  const listing = await fs.promises.readdir(folder)
-  const targets = listing.filter(item => {
-    return item.endsWith('.bin')
+  const results = await readMetadata(folder)
+   const targets = results.map(item => {
+    return item.storagePath
   })
 
   for (const target of targets) {
     const pass = new PassThrough()
-    const readStream = fs.createReadStream(path.join(folder, target))
+    const readStream = fs.createReadStream(target)
       .on('error', err => {
         throw err
       })
       // -- TODO .pipe(lzma.createDecompressor())
+      .pipe(lzma.createDecompressor())
       .pipe(pass)
 
     // -- this is an dumb workaround for zma-native/issues/74; it makes the stream async iterable.
-    
     for await (const buffer of readStream) {
       let idx = 0
       while (idx < (buffer.length - 4)) {
