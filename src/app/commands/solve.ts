@@ -11,7 +11,8 @@ import {
   Grid,
   Solution,
   RootGenerator,
-  PixelGenerator
+  PixelGenerator,
+  RawPolyArgs
 } from '../../commons/types'
 
 /**
@@ -114,12 +115,6 @@ function * binSolutions (iter:RootGenerator, opts:BinSolutionOpts):PixelGenerato
 
     yield buffer
   }
-}
-
-interface RawPolyArgs {
-  "--config": string,
-  "--name": string,
-  show: Boolean
 }
 
 const getFilePaths = (coeff:number, order:number) => {

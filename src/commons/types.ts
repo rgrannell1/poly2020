@@ -47,7 +47,7 @@ export interface ConfigSection {
 export interface RawPolyArgs {
   "--config": string,
   "--name": string,
-  show: Boolean
+  metadata: Boolean
 }
 
 export type RootGenerator = Generator<number[][][], void, undefined>

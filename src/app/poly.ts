@@ -13,7 +13,7 @@ import {
  * @param rawArgs arguments provided by the CLI interface 
  */
 const poly = async (rawArgs:RawPolyArgs) => {
-  if (rawArgs.show) {
+  if (rawArgs.metadata) {
     await showMetadata()
   } else {
     await solve(rawArgs)
