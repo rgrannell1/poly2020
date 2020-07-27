@@ -1,5 +1,6 @@
 
-import BT from './binary-transcoder.js'
+import BinaryTranscoder from './binary-transcoder.js'
+
 import {
   readMetadata,
   readSolutions,
@@ -33,7 +34,7 @@ const transform = {
 }
 
 const storage = {
-  BinaryTranscoder: BT,
+  BinaryTranscoder,
   read,
   write,
   transform

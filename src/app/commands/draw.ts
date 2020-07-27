@@ -32,8 +32,6 @@ const draw = async (rawArgs:any) => {
     image.set(x, y, 2, 255)
     image.set(x, y, 3, 255)
   }
-
-  console.log(ith)
   
   const writeStream = fs.createWriteStream('v2.png')
   pixels.default(image, 'png')

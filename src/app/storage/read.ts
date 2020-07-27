@@ -56,13 +56,16 @@ export const readSolutions = async function * (order:number, folder:string) {
       .pipe(pass)
 
     // -- this is an dumb workaround for zma-native/issues/74; it makes the stream async iterable.
-    let idx = 0
+    
     for await (const buffer of readStream) {
-      const x = buffer.readUInt16BE(idx)
-      const y = buffer.readUInt16BE(idx + 2)
-      idx += 4
+      let idx = 0
+      while (idx < (buffer.length - 4)) {
+        let x = buffer.readUInt16BE(idx)
+        let y = buffer.readUInt16BE(idx + 2)
+        idx += 4
 
-      yield {x, y}
+        yield {x, y}
+      }
     }
   }
 }
