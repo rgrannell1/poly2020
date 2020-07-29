@@ -52,8 +52,7 @@ export const readSolutions = async function * (order:number, folder:string) {
       .on('error', err => {
         throw err
       })
-      // -- TODO .pipe(lzma.createDecompressor())
-      .pipe(lzma.createDecompressor())
+      //.pipe(lzma.createDecompressor())
       .pipe(pass)
 
     // -- this is an dumb workaround for zma-native/issues/74; it makes the stream async iterable.

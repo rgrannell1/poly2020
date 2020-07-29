@@ -15,8 +15,8 @@
         "count": 10000
       },
       "image": {
-        "outputPath": "example.png",
-        "resolution": 1000
+        "outputPath": "default.png",
+        "resolution": 10000
       }
     },
 

@@ -1,6 +1,6 @@
 {
-  "name": "poly",
-  "version": "1.0.0",
+  "name": "poly2020",
+  "version": "0.1.0",
   "main": "index.js",
   "type": "module",
   "devDependencies": {
@@ -12,13 +12,24 @@
     "tap": "14.10.8",
     "typescript": "3.9.7"
   },
+  "preferGlobal": true,
+  "bin": {
+    "poly2020": "out/src/cli/poly.js"
+  },  
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rgrannell1/poly2020.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rgrannell1/poly2020/issues"
+  },  
   "scripts": {
     "tsc": "tsc",
     "perf:clean": "rm isolate* || echo 'no files to remove'",
     "perf:measure": "npm run tsc && npm run perf:clean && node --prof out/src/cli/poly.js --config config.json --name profile",
     "perf:show": "npm run perf:measure && node --prof-process --preprocess -j isolate*.log | node_modules/.bin/flamebearer"
   },
-  "author": "Róisín Grannell",
+  "author": "Róisín Grannell <r.grannell2@gmail.com>",
   "license": "MIT",
   "dependencies": {
     "@types/chai": "4.2.12",

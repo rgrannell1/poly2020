@@ -1,0 +1,26 @@
+name: poly2020
+grade: stable
+version: v0.1.0
+base: core18
+
+license: MIT
+
+summary: Highlight Logs
+
+description: >
+  Plot solutions to billions of polynomials, to create beautiful fractals.
+confinement: strict
+
+apps:
+  kale:
+    command: bin/poly2020
+    plugs:
+      - home
+
+parts:
+  poly2020:
+    source: .
+    plugin: nodejs
+    nodejs-version: 14.3.0
+    nodejs-package-manager: yarn
+    build-packages: ['libcurl4-openssl-dev', 'git']

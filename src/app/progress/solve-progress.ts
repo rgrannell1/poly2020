@@ -42,7 +42,8 @@ export default class SolveProgress {
   solvedSummary () {
     // -- show percentage complete.
     const ratio = `${this.count.toLocaleString()} / ${this.finalCount.toLocaleString()}`
-    const percentage = Math.round(this.count / this.finalCount) * 100
+    // -- todo round.
+    const percentage = (this.count / this.finalCount) * 100
 
     return `${ratio} (${percentage}%)`
   }
