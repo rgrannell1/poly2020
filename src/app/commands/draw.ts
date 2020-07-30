@@ -39,6 +39,14 @@ const draw = async (rawArgs:any) => {
     image.set(x, y, 3, a)
   }
   
+  try {
+    await fs.promises.unlink(config.image.outputPath)
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      throw err
+    }
+  }
+
   const writeStream = fs.createWriteStream(config.image.outputPath)
   pixels.default(image, 'png')
     .pipe(writeStream)

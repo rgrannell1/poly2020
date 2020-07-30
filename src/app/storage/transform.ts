@@ -1,6 +1,5 @@
 
 import stream from 'stream'
-import BinaryTranscoder from './binary-transcoder.js'
 import {
   PixelGenerator
 } from '../../commons/types'
@@ -15,9 +14,8 @@ import {
  * were worse when tested.
  * 
  * @param iter 
- * @param transcoder 
  */
-export const encodePixelsAsBinary = function * (iter:PixelGenerator, transcoder:BinaryTranscoder) {
+export const encodePixelsAsBinary = function * (iter:PixelGenerator) {
   let filter:Set<String> = new Set()
 
   for (const stretch of iter) {
@@ -34,9 +32,14 @@ export const encodePixelsAsBinary = function * (iter:PixelGenerator, transcoder:
         const y = coord.y
         const key = `${x}${y}`
     
+        // NOTE there was an undefined-ish error after billions of entries
+        if (typeof x === 'undefined' || typeof y === 'undefined') {
+          continue
+        }
+
         if (!filter.has(key)) {
           filter.add(key)
-          unique.push(x, y)
+          unique.push(x, y)          
         }
       }
     }  
@@ -45,6 +48,9 @@ export const encodePixelsAsBinary = function * (iter:PixelGenerator, transcoder:
 
     let idx = 0
     for (const num of unique) {
+      if (num < 0 || num > Math.pow(2, 16) - 1) {
+        continue
+      }
       idx = buffer.writeUInt16BE(num, idx)
     }
 
@@ -78,7 +84,7 @@ export const binaryPixelsAsReadStream = (binaryPixels:EncodedIter):ReaderData =>
           continue
         }
 
-        readerData.count += BinaryTranscoder.count(buff, 2)
+        readerData.count += buff.length / Math.pow(2, 2)
         this.push(buff)        
       }
 

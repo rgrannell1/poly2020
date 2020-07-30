@@ -1,7 +1,6 @@
 
 import { PassThrough }  from 'stream'
-import lzma from 'lzma-native'
-import mergeStream from 'merge-stream'
+import Compressor from './compressor.js'
 import * as fs from 'fs'
 import * as path from 'path'
 
@@ -46,16 +45,15 @@ export const readSolutions = async function * (order:number, folder:string) {
     return item.storagePath
   })
 
+  const compress = new Compressor('brotli')
+
   for (const target of targets) {
-    const pass = new PassThrough()
     const readStream = fs.createReadStream(target)
       .on('error', err => {
         throw err
       })
-      //.pipe(lzma.createDecompressor())
-      .pipe(pass)
+      .pipe(compress.decompress())
 
-    // -- this is an dumb workaround for zma-native/issues/74; it makes the stream async iterable.
     for await (const buffer of readStream) {
       let idx = 0
       while (idx < (buffer.length - 4)) {

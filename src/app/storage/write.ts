@@ -1,8 +1,8 @@
 
-import lzma from 'lzma-native'
 import * as fs from 'fs'
 
 import * as transform from './transform.js'
+import Compressor from './compressor.js'
 
 interface WriteMetadataOpts {
   [key:string]: any
@@ -49,9 +49,11 @@ export const writeSolutions = async (binarySolutions:any, opts:WriteSolutionOpts
       throw new Error('reader was not defined.')
     }
 
+    const compress = new Compressor('brotli')
+
     const fstream = readerData.reader
       .on('error', reject)
-      //.pipe(lzma.createCompressor())
+      .pipe(compress.compress(readerData))
       .on('error', reject)
       .pipe(writer)
       .on('error', reject)
@@ -61,8 +63,9 @@ export const writeSolutions = async (binarySolutions:any, opts:WriteSolutionOpts
     })
   })
 
+  // -- error condition.
   if (writtenCount === 0) {
-    return
+    throw new Error('no solutions written')
   }
 
   // -- get the size of the file

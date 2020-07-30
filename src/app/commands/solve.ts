@@ -153,8 +153,7 @@ const solve = async (rawArgs:RawPolyArgs) => {
       yBounds: config.image.bounds.y
     })
 
-    const transcoder = new storage.BinaryTranscoder(16)
-    const binarySolutions = storage.transform.encodePixelsAsBinary(binIter, transcoder)
+    const binarySolutions = storage.transform.encodePixelsAsBinary(binIter)
   
     const {
       storagePath,

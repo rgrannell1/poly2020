@@ -16,7 +16,7 @@
     "default": {
       "template": "default",
       "polynomial": {
-        "count": 500000000
+        "count": 100000000
       },
       "image": {
         "outputPath": "default.png",
