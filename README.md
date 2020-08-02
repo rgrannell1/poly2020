@@ -62,6 +62,18 @@ Creating a flame-graph
 npm run perf:show
 ```
 
+Testing locally
+
+```
+npm run draw:default
+```
+
+Removing existing data
+
+```
+npm run clean
+```
+
 ## Testing
 
 ## Installation

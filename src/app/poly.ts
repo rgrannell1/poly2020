@@ -17,7 +17,6 @@ const poly = async (rawArgs:RawPolyArgs) => {
     await showMetadata()
   } else {
     await solve(rawArgs)
-    console.log('drawing.')
     await draw(rawArgs)
   }
 }

@@ -6,6 +6,15 @@ import * as pixels from 'save-pixels'
 import * as colours from '../../commons/colours.js'
 import storage from '../../app/storage/index.js'
 import * as configModule from '../../app/config.js'
+import { log } from 'console'
+
+const logDrawingStart = (totalSolutions:number) => {
+  console.log(`🦜 drawing ${totalSolutions.toLocaleString()} solutions...`)
+}
+
+const logFinish = (fpath:string) => {
+  console.log(`🦜 image saved to ${fpath}`)
+}
 
 const draw = async (rawArgs:any) => {
   const configPath = rawArgs['--config']
@@ -15,8 +24,9 @@ const draw = async (rawArgs:any) => {
   const solutions = await storage.read.solutions(config.polynomial.order, 'data')
 
   const image = zeros.default([config.image.resolution, config.image.resolution, 4])
-
   const totalSolutions = await storage.read.solvedCount(config.polynomial.order, 'data')
+
+  logDrawingStart(totalSolutions)
 
   for (let ith = 0; ith < config.image.resolution; ++ith) {
     for (let jth = 0; jth < config.image.resolution; ++jth) {
@@ -47,11 +57,16 @@ const draw = async (rawArgs:any) => {
     }
   }
 
-  const writeStream = fs.createWriteStream(config.image.outputPath)
-  pixels.default(image, 'png')
-    .pipe(writeStream)
-
-  return
+  return new Promise((resolve, reject) => {
+    const writeStream = fs.createWriteStream(config.image.outputPath)
+    pixels.default(image, 'png')
+      .pipe(writeStream)
+      .on('error', reject)
+      .on('finish', () => {
+        logFinish(config.image.outputPath)
+        resolve()
+      })
+  })
 }
 
 export default draw

@@ -87,7 +87,8 @@ export default class SolveProgress {
       `🦜 ${solvedSummary}`,
       timeRatio,
       `${solvedPerSecond.toLocaleString()}Hz [${secondsPerBillion}]1e9 [${secondsPerTrillion}]1e12`,
-      `${((this.startBytes + this.bytes) / 1e6).toFixed(1)}mb ${this.compressionRatio()}`
+      `${((this.startBytes + this.bytes) / 1e6).toFixed(1)}mb ${this.compressionRatio()}`,
+      `heap ${(process.memoryUsage().heapUsed / 1e9).toFixed(2)}gb`
     ]
 
     for (let ith = 0; ith < parts.length; ++ith) {

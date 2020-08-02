@@ -25,6 +25,8 @@
   },  
   "scripts": {
     "tsc": "tsc",
+    "clean": "rm -rf data && mkdir data",
+    "draw:default": "npm run tsc && node out/src/cli/poly.js --config config.json --name default",
     "perf:clean": "rm isolate* || echo 'no files to remove'",
     "perf:measure": "npm run tsc && npm run perf:clean && node --prof out/src/cli/poly.js --config config.json --name profile",
     "perf:show": "npm run perf:measure && node --prof-process --preprocess -j isolate*.log | node_modules/.bin/flamebearer"

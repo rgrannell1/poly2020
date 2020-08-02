@@ -29,11 +29,7 @@ export const encodePixelsAsBinary = function * (iter:PixelGenerator) {
         const y = coord.y
         const key = `${x}${y}`
     
-        // NOTE there was an undefined-ish error after billions of entries
-        if (typeof x === 'undefined' || typeof y === 'undefined') {
-          continue
-        }
-
+        // -- NOTE: this filter has a max size of 16,777,216 elems as of Node 14.x
         if (!filter.has(key)) {
           filter.add(key)
           unique.push(x, y)          
