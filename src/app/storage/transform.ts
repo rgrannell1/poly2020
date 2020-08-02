@@ -4,6 +4,7 @@ import {
   PixelGenerator,
   ReaderData
 } from '../../commons/types'
+import BigSet from '../../commons/big-set.js'
 
 /**
  * Convert an iterator of x,y coordinates into a iterator of binary-encoded coordinates. Filter
@@ -13,7 +14,7 @@ import {
  * @param iter 
  */
 export const encodePixelsAsBinary = function * (iter:PixelGenerator) {
-  let filter:Set<String> = new Set()
+  let filter:BigSet<String> = new BigSet()
 
   for (const stretch of iter) {
     if (!stretch) {
@@ -29,7 +30,8 @@ export const encodePixelsAsBinary = function * (iter:PixelGenerator) {
         const y = coord.y
         const key = `${x}${y}`
     
-        // -- NOTE: this filter has a max size of 16,777,216 elems as of Node 14.x
+        // -- NOTE: this filter has a max size of 16,777,216 elems as of Node 14.x,
+
         if (!filter.has(key)) {
           filter.add(key)
           unique.push(x, y)          
