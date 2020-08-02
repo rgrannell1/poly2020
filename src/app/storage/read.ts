@@ -96,3 +96,13 @@ export const readSolvedCount = async (order:number, folder:string) => {
       return acc + curr.count 
     }, 0)
 }
+
+export const readSolvedBytes = async (order:number, folder:string) => {
+  const results = await readMetadata(folder)
+
+  return results
+    .filter(result => result.order === order)  
+    .reduce((acc, curr) => {
+      return acc + curr.size.b
+    }, 0)
+} 

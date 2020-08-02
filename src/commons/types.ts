@@ -1,4 +1,6 @@
 
+import * as stream from 'stream'
+
 export type Colour = [number, number, number, number]
 
 export interface Pixel {
@@ -48,6 +50,13 @@ export interface RawPolyArgs {
   "--config": string,
   "--name": string,
   metadata: Boolean
+}
+
+export interface ReaderData {
+  count: number,
+  readBytes: number,
+  compressedBytes: number,
+  reader?: stream.Readable
 }
 
 export type RootGenerator = Generator<number[][][], void, undefined>

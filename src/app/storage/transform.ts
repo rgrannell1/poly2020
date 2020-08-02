@@ -1,12 +1,9 @@
 
 import stream from 'stream'
 import {
-  PixelGenerator
+  PixelGenerator,
+  ReaderData
 } from '../../commons/types'
-
-import {
-  WRITE_SOLUTION_BUFFER_SIZE
-} from '../../commons/constants.js'
 
 /**
  * Convert an iterator of x,y coordinates into a iterator of binary-encoded coordinates. Filter
@@ -61,11 +58,6 @@ export const encodePixelsAsBinary = function * (iter:PixelGenerator) {
 // TODO check if this should be [string, string]
 type EncodedIter = Generator<Buffer, void, unknown>
 
-interface ReaderData {
-  count: number,
-  reader?: stream.Readable
-}
-
 /**
  * Convert an iterator of binary-encoded [x, y] arrays to a ReadStream.
  * 
@@ -73,7 +65,9 @@ interface ReaderData {
  */
 export const binaryPixelsAsReadStream = (binaryPixels:EncodedIter):ReaderData => {  
   const readerData:ReaderData = {
-    count: 0
+    count: 0,
+    readBytes: 0,
+    compressedBytes: 0
   } 
   
   const reader = new stream.Readable({
@@ -84,6 +78,7 @@ export const binaryPixelsAsReadStream = (binaryPixels:EncodedIter):ReaderData =>
           continue
         }
 
+        readerData.readBytes += buff.length
         readerData.count += buff.length / Math.pow(2, 2)
         this.push(buff)        
       }

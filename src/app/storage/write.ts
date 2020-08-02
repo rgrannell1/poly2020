@@ -3,6 +3,12 @@ import * as fs from 'fs'
 
 import * as transform from './transform.js'
 import Compressor from './compressor.js'
+import SolveProgress from '../progress/solve-progress.js'
+
+import {
+  ReaderData
+} from '../../commons/types'
+import { PassThrough, Transform, Stream } from 'stream'
 
 interface WriteMetadataOpts {
   [key:string]: any
@@ -26,7 +32,17 @@ interface WriteSolutionOpts {
   storagePath: string,
   metadataPath: string,
   coeff: number,
-  order: number
+  order: number,
+  bar: SolveProgress
+}
+
+const byteCompressor = (readerData:ReaderData) => {
+  return new Transform({
+    transform (data:Buffer | string, encoding:string, callback:Function) {
+      readerData.compressedBytes += data.length
+      callback(null, data)
+    }
+  })
 }
 
 /**
@@ -44,40 +60,43 @@ export const writeSolutions = async (binarySolutions:any, opts:WriteSolutionOpts
   })
 
   // -- wait for all data to be written before writing metadata.
-  const writtenCount = await new Promise((resolve, reject) => {
-    if (typeof readerData.reader === 'undefined') {
+const writtenData:ReaderData = await new Promise((resolve, reject) => {
+  if (typeof readerData.reader === 'undefined') {
       throw new Error('reader was not defined.')
     }
 
     const compress = new Compressor('brotli')
-
     const fstream = readerData.reader
       .on('error', reject)
       .pipe(compress.compress(readerData))
+      .pipe(byteCompressor(readerData))
       .on('error', reject)
       .pipe(writer)
       .on('error', reject)
 
     fstream.on('finish', () => {
-      resolve(readerData.count)
+      resolve(readerData)
     })
   })
 
   // -- error condition.
-  if (writtenCount === 0) {
+  if (writtenData.count === 0) {
     throw new Error('no solutions written')
   }
 
   // -- get the size of the file
   const stat = await fs.promises.lstat(opts.storagePath)
 
+  opts.bar.updateBytes(stat.size)
+
   // -- write metadata after so we can assume the data files are complete
   await writeMetadata(opts.metadataPath, {
     coeff: opts.coeff,
     order: opts.order,
-    count: writtenCount,
+    count: writtenData.count,
     storagePath: opts.storagePath,
     size: {
+      b: stat.size,
       gb: stat.size / 1e9,
       mb: stat.size / 1e6,
       tb: stat.size / 1e12  

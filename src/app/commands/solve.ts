@@ -161,6 +161,7 @@ const solve = async (rawArgs:RawPolyArgs) => {
     } = getFilePaths(coeff, order)
 
     await storage.write.solutions(binarySolutions, {
+      bar,
       storagePath,
       metadataPath,
       coeff,

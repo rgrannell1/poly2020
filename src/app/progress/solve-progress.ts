@@ -8,15 +8,18 @@ const formatTime = (measured:number):string => {
 
   return `${hours ? hours + 'h ' : ''}${minutes ? minutes + 'm ' : ''}${seconds}s`
 }
+
 export default class SolveProgress {
   count: number
   finalCount: number
   startTime: number
   startCount: number
+  bytes: number
   widths: number[]
 
   constructor () {
     this.count = 0
+    this.bytes = 0
     this.widths = []
   }
   async start (order:number, finalCount:number, folder:string) {
@@ -25,6 +28,8 @@ export default class SolveProgress {
     
     const preSolved = await storage.read.solvedCount(order, folder)
     this.startCount = preSolved
+
+    this.bytes = await storage.read.solvedBytes(order, folder)
 
     this.update(preSolved)
   }
@@ -36,6 +41,11 @@ export default class SolveProgress {
 
     this.show()
   }
+  updateBytes (bytes:number) {
+    this.bytes += bytes
+
+    this.show()
+  }
   elapsedSeconds () {
     return (Date.now() - this.startTime) / 1000
   }
@@ -43,7 +53,7 @@ export default class SolveProgress {
     // -- show percentage complete.
     const ratio = `${this.count.toLocaleString()} / ${this.finalCount.toLocaleString()}`
     // -- todo round.
-    const percentage = (this.count / this.finalCount) * 100
+    const percentage = ((this.count / this.finalCount) * 100).toFixed(2)
 
     return `${ratio} (${percentage}%)`
   }
@@ -70,7 +80,8 @@ export default class SolveProgress {
     const parts = [
       `🦜 ${solvedSummary}`,
       timeRatio,
-      `${solvedPerSecond.toLocaleString()}Hz [${secondsPerBillion}]1e9 [${secondsPerTrillion}]1e12`
+      `${solvedPerSecond.toLocaleString()}Hz [${secondsPerBillion}]1e9 [${secondsPerTrillion}]1e12`,
+      `${(this.bytes / 1e6).toFixed(1)}mb`
     ]
 
     for (let ith = 0; ith < parts.length; ++ith) {

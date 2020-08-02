@@ -3,7 +3,8 @@ import {
   readMetadata,
   readSolutions,
   readStartCoefficient,
-  readSolvedCount
+  readSolvedCount,
+  readSolvedBytes
 } from './read.js'
 
 import {
@@ -19,7 +20,8 @@ const read = {
   metadata: readMetadata,
   solutions: readSolutions,
   startCoefficient: readStartCoefficient,
-  solvedCount: readSolvedCount
+  solvedCount: readSolvedCount,
+  solvedBytes: readSolvedBytes
 }
 
 const write = {
