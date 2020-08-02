@@ -14,6 +14,8 @@ export default class SolveProgress {
   finalCount: number
   startTime: number
   startCount: number
+  startBytes: number
+  uncompressedBytes: number
   bytes: number
   widths: number[]
 
@@ -26,27 +28,25 @@ export default class SolveProgress {
     this.startTime = Date.now()
     this.finalCount = finalCount
     
+    this.startBytes = await storage.read.solvedBytes(order, folder)
     const preSolved = await storage.read.solvedCount(order, folder)
     this.startCount = preSolved
 
-    this.bytes = await storage.read.solvedBytes(order, folder)
-
-    this.update(preSolved)
+    this.updateCount(preSolved)
   }
-  runCount() {
+  currentRunCount() {
     return this.count - this.startCount
   }
-  update (count:number) {
+  updateCount (count:number) {
     this.count = count
-
-    this.show()
   }
-  updateBytes (bytes:number) {
+  updateCompressedBytes (bytes:number) {
     this.bytes += bytes
-
-    this.show()
   }
-  elapsedSeconds () {
+  setDecompressedBytes (bytes:number) {
+    this.uncompressedBytes = bytes
+  }
+  elapsedRunSeconds () {
     return (Date.now() - this.startTime) / 1000
   }
   solvedSummary () {
@@ -58,21 +58,27 @@ export default class SolveProgress {
     return `${ratio} (${percentage}%)`
   }
   timeRatio () {
-    const elapsed = this.elapsedSeconds()
+    const elapsed = this.elapsedRunSeconds()
     const elapsedTime = formatTime(Math.floor(elapsed))
 
-    const hz = this.runCount() / elapsed
+    const hz = this.currentRunCount() / elapsed
     const remainingSeconds = Math.ceil((this.finalCount - this.startCount) / hz)
 
     const remainingTime = formatTime(remainingSeconds)
     return `[${elapsedTime}] / [${remainingTime}]`    
   }
+  compressionRatio () {
+    const denom = Math.round(this.uncompressedBytes / this.bytes)
+
+    return Number.isNaN(denom)
+      ? 'shrunk ???'
+      : `shrunk 1:${denom}`
+  }
   show () {
     const solvedSummary = this.solvedSummary()
     const timeRatio = this.timeRatio()
 
-    const solvedPerSecond = Math.floor(this.runCount() / this.elapsedSeconds())
-
+    const solvedPerSecond = Math.floor(this.currentRunCount() / this.elapsedRunSeconds())
     const secondsPerBillion = formatTime(Math.ceil(1e9 / solvedPerSecond))
     const secondsPerTrillion = formatTime(Math.ceil(1e12 / solvedPerSecond))
 
@@ -81,7 +87,7 @@ export default class SolveProgress {
       `🦜 ${solvedSummary}`,
       timeRatio,
       `${solvedPerSecond.toLocaleString()}Hz [${secondsPerBillion}]1e9 [${secondsPerTrillion}]1e12`,
-      `${(this.bytes / 1e6).toFixed(1)}mb`
+      `${((this.startBytes + this.bytes) / 1e6).toFixed(1)}mb ${this.compressionRatio()}`
     ]
 
     for (let ith = 0; ith < parts.length; ++ith) {

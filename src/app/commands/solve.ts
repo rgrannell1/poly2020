@@ -50,18 +50,22 @@ const solvePolynomials = function * (iter:any, bar:SolveProgress):RootGenerator 
     count += 4 // -- remove hardcoding!
 
     if (count % 100_000 === 0) {     
-      bar.update(count)
+      bar.updateCount(count)
+      bar.show()
     }
 
     buffer.push(data)
 
     if (buffer.length > 100_000) {
-      bar.update(count)
+      bar.updateCount(count)
+      bar.show()
+
       yield buffer
       buffer = []
     }
   }
-  bar.update(count)
+  bar.updateCount(count)
+  bar.show()
 
   yield buffer
 }

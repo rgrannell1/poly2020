@@ -36,9 +36,13 @@ interface WriteSolutionOpts {
   bar: SolveProgress
 }
 
-const byteCompressor = (readerData:ReaderData) => {
+const byteCounter = (bar:any, readerData:ReaderData) => {
   return new Transform({
     transform (data:Buffer | string, encoding:string, callback:Function) {
+
+      bar.setDecompressedBytes(readerData.readBytes)
+      bar.updateCompressedBytes(data.length)
+
       readerData.compressedBytes += data.length
       callback(null, data)
     }
@@ -60,8 +64,8 @@ export const writeSolutions = async (binarySolutions:any, opts:WriteSolutionOpts
   })
 
   // -- wait for all data to be written before writing metadata.
-const writtenData:ReaderData = await new Promise((resolve, reject) => {
-  if (typeof readerData.reader === 'undefined') {
+  const writtenData:ReaderData = await new Promise((resolve, reject) => {
+    if (typeof readerData.reader === 'undefined') {
       throw new Error('reader was not defined.')
     }
 
@@ -69,7 +73,7 @@ const writtenData:ReaderData = await new Promise((resolve, reject) => {
     const fstream = readerData.reader
       .on('error', reject)
       .pipe(compress.compress(readerData))
-      .pipe(byteCompressor(readerData))
+      .pipe(byteCounter(opts.bar, readerData))
       .on('error', reject)
       .pipe(writer)
       .on('error', reject)
@@ -86,8 +90,6 @@ const writtenData:ReaderData = await new Promise((resolve, reject) => {
 
   // -- get the size of the file
   const stat = await fs.promises.lstat(opts.storagePath)
-
-  opts.bar.updateBytes(stat.size)
 
   // -- write metadata after so we can assume the data files are complete
   await writeMetadata(opts.metadataPath, {
